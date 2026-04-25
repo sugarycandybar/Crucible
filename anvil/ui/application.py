@@ -1,0 +1,110 @@
+"""
+AnvilApplication — Main Adw.Application subclass.
+Handles app lifecycle, CSS loading, actions, and stress-ng cleanup.
+"""
+from pathlib import Path
+
+import gi
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gtk, Adw, Gio, Gdk  # noqa: E402
+
+from anvil.version import __version__
+from anvil.backend.hardware import gather_specs
+from anvil.backend.monitor import SystemMonitor
+from anvil.backend.stress import StressManager
+from anvil.ui.window import AnvilWindow
+
+
+APP_ID = "io.github.sugarycandybar.Anvil"
+APP_NAME = "Anvil"
+
+
+class AnvilApplication(Adw.Application):
+    """Main Anvil application."""
+
+    def __init__(self):
+        super().__init__(
+            application_id=APP_ID,
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+        )
+        self._window = None
+        self._specs = None
+        self._monitor = SystemMonitor()
+        self._stress = StressManager()
+
+    def do_startup(self):
+        """Load CSS, gather hardware specs, register actions."""
+        Adw.Application.do_startup(self)
+        self._load_css()
+        self._register_packaged_icons()
+        self._specs = gather_specs()
+        self._setup_actions()
+
+    def do_activate(self):
+        """Show the main window."""
+        if not self._window:
+            self._window = AnvilWindow(
+                specs=self._specs,
+                monitor=self._monitor,
+                stress=self._stress,
+                application=self,
+            )
+        self._window.present()
+
+    def do_shutdown(self):
+        """Kill stress-ng if it's still running."""
+        self._stress.kill()
+        Adw.Application.do_shutdown(self)
+
+    # --- CSS ------------------------------------------------------------
+
+    def _load_css(self):
+        css_provider = Gtk.CssProvider()
+        css_path = Path(__file__).parent / "style.css"
+        if css_path.exists():
+            css_provider.load_from_path(str(css_path))
+            Gtk.StyleContext.add_provider_for_display(
+                Gdk.Display.get_default(),
+                css_provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+            )
+
+    def _register_packaged_icons(self):
+        """Make packaged icons discoverable during development."""
+        display = Gdk.Display.get_default()
+        if not display:
+            return
+        icon_dir = Path(__file__).resolve().parents[2] / "packaging" / "linux"
+        if icon_dir.exists():
+            icon_theme = Gtk.IconTheme.get_for_display(display)
+            icon_theme.add_search_path(str(icon_dir))
+
+    # --- actions --------------------------------------------------------
+
+    def _setup_actions(self):
+        action_about = Gio.SimpleAction.new("about", None)
+        action_about.connect("activate", self._on_about)
+        self.add_action(action_about)
+
+        action_quit = Gio.SimpleAction.new("quit", None)
+        action_quit.connect("activate", self._on_quit)
+        self.add_action(action_quit)
+
+        self.set_accels_for_action("app.quit", ["<Primary>q"])
+
+    def _on_about(self, _action, _param):
+        dialog = Adw.AboutDialog(
+            application_name=APP_NAME,
+            application_icon=APP_ID,
+            version=__version__,
+            developer_name="Sugarycandybar",
+            website="https://github.com/sugarycandybar/Anvil",
+            issue_url="https://github.com/sugarycandybar/Anvil/issues",
+            license_type=Gtk.License.GPL_3_0,
+            comments="View hardware specs and stress test your system.",
+        )
+        dialog.present(self._window)
+
+    def _on_quit(self, _action, _param):
+        self.quit()

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7d8590"/>
+      <stop offset="100%" stop-color="#4a5058"/>
+    </linearGradient>
+    <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#636b73"/>
+      <stop offset="100%" stop-color="#3a4148"/>
+    </linearGradient>
+    <linearGradient id="topGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#99a1a8"/>
+      <stop offset="100%" stop-color="#7d8590"/>
+    </linearGradient>
+  </defs>
+  <!-- Shadow -->
+  <ellipse cx="64" cy="112" rx="48" ry="6" fill="#00000033"/>
+  <!-- Base / body -->
+  <path d="M12,96 L116,96 L108,108 L20,108 Z" fill="url(#bodyGrad)" stroke="#2e3436" stroke-width="1.5"/>
+  <!-- Front face -->
+  <path d="M20,108 L108,108 L112,112 L16,112 Z" fill="url(#faceGrad)" stroke="#2e3436" stroke-width="1"/>
+  <!-- Top surface -->
+  <path d="M12,96 L116,96 L100,88 L28,88 Z" fill="url(#topGrad)" stroke="#2e3436" stroke-width="1.5"/>
+  <!-- Horn (left) -->
+  <path d="M28,88 L28,80 L8,76 L8,84 Z" fill="url(#bodyGrad)" stroke="#2e3436" stroke-width="1.5"/>
+  <path d="M8,76 L28,80 L28,88 L12,96 Z" fill="url(#faceGrad)" stroke="#2e3436" stroke-width="1" opacity="0.6"/>
+  <!-- Horn top -->
+  <path d="M8,76 L28,80 L28,76 L10,72 Z" fill="url(#topGrad)" stroke="#2e3436" stroke-width="1"/>
+  <!-- Step / shelf -->
+  <path d="M28,88 L100,88 L100,72 L28,72 Z" fill="url(#bodyGrad)" stroke="#2e3436" stroke-width="1.5"/>
+  <!-- Step top -->
+  <path d="M28,72 L100,72 L92,64 L36,64 Z" fill="url(#topGrad)" stroke="#2e3436" stroke-width="1.5"/>
+  <!-- Hardie hole -->
+  <rect x="56" y="66" width="16" height="6" rx="1" fill="#2e3436" opacity="0.5"/>
+  <!-- Highlight line on face -->
+  <line x1="24" y1="100" x2="112" y2="100" stroke="#ffffff" stroke-width="0.8" opacity="0.15"/>
+  <!-- Highlight on top -->
+  <line x1="38" y1="66" x2="90" y2="66" stroke="#ffffff" stroke-width="0.6" opacity="0.2"/>
+</svg>

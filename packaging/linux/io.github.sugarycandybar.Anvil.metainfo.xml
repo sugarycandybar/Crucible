@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.sugarycandybar.Anvil</id>
+  <name>Anvil</name>
+  <summary>View hardware specs and stress test your system</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.github.sugarycandybar">
+    <name>Sugarycandybar</name>
+  </developer>
+  <update_contact>139514123+sugarycandybar@users.noreply.github.com</update_contact>
+  <description>
+    <p>
+      Anvil gives you a clear overview of your system hardware and lets you
+      push it to its limits with built-in stress testing.
+    </p>
+    <ul>
+      <li>View CPU, GPU, and memory details at a glance</li>
+      <li>Copy a formatted spec sheet to share with others</li>
+      <li>Run CPU stress tests with configurable workers and duration</li>
+      <li>Monitor temperature and frequency in real time</li>
+      <li>Automatic safety cutoff when temperatures get too high</li>
+    </ul>
+  </description>
+  <categories>
+    <category>System</category>
+    <category>Monitor</category>
+  </categories>
+  <keywords>
+    <keyword>hardware</keyword>
+    <keyword>specs</keyword>
+    <keyword>stress</keyword>
+    <keyword>test</keyword>
+    <keyword>cpu</keyword>
+    <keyword>temperature</keyword>
+    <keyword>benchmark</keyword>
+    <keyword>gpu</keyword>
+    <keyword>ram</keyword>
+  </keywords>
+  <branding>
+    <color type="primary" scheme_preference="light">#3584e4</color>
+    <color type="primary" scheme_preference="dark">#1a5fb4</color>
+  </branding>
+  <launchable type="desktop-id">io.github.sugarycandybar.Anvil.desktop</launchable>
+  <url type="homepage">https://github.com/sugarycandybar/Anvil</url>
+  <url type="bugtracker">https://github.com/sugarycandybar/Anvil/issues</url>
+  <url type="vcs-browser">https://github.com/sugarycandybar/Anvil</url>
+  <releases>
+    <release version="0.1.0" date="2026-04-21">
+      <description>
+        <p>Initial release</p>
+      </description>
+    </release>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

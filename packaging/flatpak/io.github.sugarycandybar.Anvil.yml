@@ -1,0 +1,38 @@
+app-id: io.github.sugarycandybar.Anvil
+runtime: org.gnome.Platform
+runtime-version: "50"
+sdk: org.gnome.Sdk
+command: anvil
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=host:ro
+  - --allow=devel
+modules:
+  - python3-requirements.json
+  - name: stress-ng
+    buildsystem: simple
+    build-commands:
+      - make -j$(nproc)
+      - install -Dm755 stress-ng /app/bin/stress-ng
+    sources:
+      - type: archive
+        url: https://github.com/ColinIanKing/stress-ng/archive/refs/tags/V0.18.08.tar.gz
+        sha256: TO_BE_FILLED
+  - name: anvil
+    buildsystem: simple
+    build-commands:
+      - install -d /app/share
+      - cp -a anvil /app/share/
+      - install -Dm755 anvil.py /app/share/anvil.py
+      - install -Dm755 packaging/flatpak/anvil-wrapper.sh /app/bin/anvil
+      - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.desktop /app/share/applications/io.github.sugarycandybar.Anvil.desktop
+      - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.metainfo.xml /app/share/metainfo/io.github.sugarycandybar.Anvil.metainfo.xml
+      - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.svg /app/share/icons/hicolor/scalable/apps/io.github.sugarycandybar.Anvil.svg
+      - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil-symbolic.svg /app/share/icons/hicolor/symbolic/apps/io.github.sugarycandybar.Anvil-symbolic.svg
+    sources:
+      - type: git
+        url: https://github.com/sugarycandybar/Anvil.git
+        commit: TO_BE_FILLED

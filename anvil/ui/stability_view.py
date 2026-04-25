@@ -128,7 +128,7 @@ class StabilityView(Gtk.ScrolledWindow):
         self._duration_row.connect("notify::selected", self._on_duration_changed)
         ctrl_group.add(self._duration_row)
 
-        self._stop_at_temp_row = Adw.SwitchRow(title="Stop at 95C")
+        self._stop_at_temp_row = Adw.SwitchRow(title="Stop at Temperature Limit")
         self._stop_at_temp_row.set_active(
             self._settings.get_boolean("stop-at-temp")
         )
@@ -279,7 +279,7 @@ class StabilityView(Gtk.ScrolledWindow):
 
     def _on_temp_limit_changed(self, *_args):
         self._settings.set_uint("temp-limit-index", self._temp_limit_row.get_selected())
-        self._stop_at_temp_row.set_title(f"Stop at {self.overheat_cutoff_c}C")
+        self._stop_at_temp_row.set_title(f"Stop at Temperature Limit")
 
     def _on_duration_changed(self, *_args):
         self._settings.set_uint("duration-index", self._duration_row.get_selected())

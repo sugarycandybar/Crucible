@@ -85,6 +85,19 @@ class SystemSpecs:
 def _get_os_info() -> tuple[str, str]:
     """Return (distro pretty-name, version-id)."""
     try:
+        # If running inside Flatpak, read the host's os-release
+        if os.path.exists("/run/host/os-release"):
+            info = {}
+            with open("/run/host/os-release") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        info[k] = v.strip('"\'')
+            return info.get("PRETTY_NAME", "Linux"), info.get("VERSION_ID", "")
+        
         info = platform.freedesktop_os_release()
         return info.get("PRETTY_NAME", "Linux"), info.get("VERSION_ID", "")
     except OSError:

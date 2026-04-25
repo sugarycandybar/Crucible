@@ -42,7 +42,8 @@ modules:
       - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.metainfo.xml /app/share/metainfo/io.github.sugarycandybar.Anvil.metainfo.xml
       - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.svg /app/share/icons/hicolor/scalable/apps/io.github.sugarycandybar.Anvil.svg
       - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil-symbolic.svg /app/share/icons/hicolor/symbolic/apps/io.github.sugarycandybar.Anvil-symbolic.svg
+      - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.Stability.gschema.xml /app/share/glib-2.0/schemas/io.github.sugarycandybar.Anvil.Stability.gschema.xml
+      - glib-compile-schemas /app/share/glib-2.0/schemas/
     sources:
-      - type: git
-        url: https://github.com/sugarycandybar/Anvil.git
-        commit: 29a70dfb751053f65eae8c4780670f6326737a49
+      - type: dir
+        path: ../../

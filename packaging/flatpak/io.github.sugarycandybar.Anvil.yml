@@ -10,10 +10,7 @@ finish-args:
   - --socket=fallback-x11
   - --device=dri
   - --filesystem=host:ro
-  - --filesystem=/proc:rw
   - --filesystem=/sys:rw
-  - --filesystem=/dev/null:rw
-  - --filesystem=/dev/urandom:rw
   - --talk-name=org.freedesktop.Notifications
   - --allow=devel
 modules:
@@ -48,4 +45,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/sugarycandybar/Anvil.git
-        commit: 03d335a8a6098b57d576996bbe3cc2da7d9ed2e0
+        commit: 22c4ffe6cff44705badc83b2ec27950890984bd9

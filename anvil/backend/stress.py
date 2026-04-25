@@ -100,6 +100,7 @@ class StressManager:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 preexec_fn=os.setsid,
+                cwd="/tmp",
             )
         except FileNotFoundError:
             return False

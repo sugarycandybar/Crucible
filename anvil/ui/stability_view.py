@@ -215,11 +215,9 @@ class StabilityView(Gtk.ScrolledWindow):
         if self._was_running and not running_now and self._notification_fn:
             elapsed = self._format_elapsed(self._stress.last_elapsed_seconds)
             if self._stress.last_stop_cause == "overheat":
-                self._notification_fn("Test stopped to prevent overheating")
-                self._notification_fn("Elapsed Time", f"{elapsed}")
+                self._notification_fn("Test stopped to prevent overheating", f"Elapsed Time: {elapsed}")
             elif self._stress.last_stop_cause == "completed":
-                self._notification_fn("Test completed successfully")
-                self._notification_fn("Elapsed Time", f"{elapsed}")
+                self._notification_fn("Test completed successfully", f"Elapsed Time: {elapsed}")
 
         self._was_running = running_now
 

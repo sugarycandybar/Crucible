@@ -6,12 +6,15 @@ from __future__ import annotations
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gdk  # noqa: E402
+from gi.repository import Gtk, Adw, Gdk, Gio  # noqa: E402
 
 from anvil.backend.hardware import SystemSpecs
 from anvil.backend.monitor import MonitorSnapshot, SystemMonitor
 from anvil.backend.stress import StressManager
 from anvil.ui.widgets.temp_gauge import TempGauge
+
+
+_SETTINGS_SCHEMA = "io.github.sugarycandybar.Anvil.Stability"
 
 
 # Duration choices: label → seconds (0 = until stopped)
@@ -22,7 +25,7 @@ _DURATIONS = [
     ("Until stopped", 0),
 ]
 
-_TEMP_LIMITS_C = [100, 95, 90, 50]
+_TEMP_LIMITS_C = [100, 95, 90]
 
 
 def _pick_icon_name(*candidates: str) -> str:
@@ -52,6 +55,8 @@ class StabilityView(Gtk.ScrolledWindow):
         self._toast_fn = None
         self._notification_fn = None
         self._was_running = False
+
+        self._settings = Gio.Settings.new(_SETTINGS_SCHEMA)
 
         self.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
@@ -117,11 +122,16 @@ class StabilityView(Gtk.ScrolledWindow):
         for label, _ in _DURATIONS:
             duration_model.append(label)
         self._duration_row.set_model(duration_model)
-        self._duration_row.set_selected(0)
+        self._duration_row.set_selected(
+            self._settings.get_uint("duration-index")
+        )
+        self._duration_row.connect("notify::selected", self._on_duration_changed)
         ctrl_group.add(self._duration_row)
 
         self._stop_at_temp_row = Adw.SwitchRow(title="Stop at 95C")
-        self._stop_at_temp_row.set_active(True)
+        self._stop_at_temp_row.set_active(
+            self._settings.get_boolean("stop-at-temp")
+        )
         self._stop_at_temp_row.add_prefix(
             Gtk.Image.new_from_icon_name(
                 _pick_icon_name(
@@ -130,18 +140,22 @@ class StabilityView(Gtk.ScrolledWindow):
                 )
             )
         )
+        self._stop_at_temp_row.connect(
+            "notify::active", self._on_stop_at_temp_changed
+        )
         ctrl_group.add(self._stop_at_temp_row)
 
         self._temp_limit_row = Adw.ComboRow(title="Temperature Limit")
         temp_limit_model = Gtk.StringList()
         for temp_c in _TEMP_LIMITS_C:
-            label = f"{temp_c}C"
-            if temp_c == 50:
-                label += " (test)"
-            temp_limit_model.append(label)
+            temp_limit_model.append(f"{temp_c}C")
         self._temp_limit_row.set_model(temp_limit_model)
-        self._temp_limit_row.set_selected(1)
-        self._temp_limit_row.connect("notify::selected", self._on_temp_limit_changed)
+        self._temp_limit_row.set_selected(
+            self._settings.get_uint("temp-limit-index")
+        )
+        self._temp_limit_row.connect(
+            "notify::selected", self._on_temp_limit_changed
+        )
         ctrl_group.add(self._temp_limit_row)
 
         content.append(ctrl_group)
@@ -264,7 +278,14 @@ class StabilityView(Gtk.ScrolledWindow):
                 self._toast_fn("Could not start stress-ng")
 
     def _on_temp_limit_changed(self, *_args):
+        self._settings.set_uint("temp-limit-index", self._temp_limit_row.get_selected())
         self._stop_at_temp_row.set_title(f"Stop at {self.overheat_cutoff_c}C")
+
+    def _on_duration_changed(self, *_args):
+        self._settings.set_uint("duration-index", self._duration_row.get_selected())
+
+    def _on_stop_at_temp_changed(self, *_args):
+        self._settings.set_boolean("stop-at-temp", self._stop_at_temp_row.get_active())
 
     @staticmethod
     def _format_elapsed(total_seconds: float) -> str:

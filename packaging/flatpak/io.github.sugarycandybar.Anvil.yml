@@ -5,12 +5,16 @@ sdk: org.gnome.Sdk
 command: anvil
 finish-args:
   - --share=ipc
+  - --share=network
   - --socket=wayland
   - --socket=fallback-x11
   - --device=dri
   - --filesystem=host:ro
-  - --filesystem=/proc:ro
-  - --filesystem=/sys:ro
+  - --filesystem=/proc:rw
+  - --filesystem=/sys:rw
+  - --filesystem=/dev/null:rw
+  - --filesystem=/dev/urandom:rw
+  - --talk-name=org.freedesktop.Notifications
   - --allow=devel
 modules:
   - name: psutil
@@ -44,4 +48,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/sugarycandybar/Anvil.git
-        commit: 46690f2a94bc9f8e938871f3d8af826b3b49812d
+        commit: 1b3acd96bc42277e53a12272d3c3a990981694ef

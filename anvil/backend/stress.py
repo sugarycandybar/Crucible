@@ -89,7 +89,8 @@ class StressManager:
             return False
 
         workers = os.cpu_count() or 1
-        cmd = ["stress-ng", "--cpu", str(workers), "--metrics-brief"]
+        stressng_path = shutil.which("stress-ng") or "stress-ng"
+        cmd = [stressng_path, "--cpu", str(workers), "--metrics-brief"]
         if duration_seconds > 0:
             cmd += ["--timeout", f"{duration_seconds}s"]
 

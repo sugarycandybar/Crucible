@@ -1,44 +1,66 @@
 # Crucible
 
-View hardware specs and stress test your system.
+Crucible is a desktop app for viewing system hardware specs and running stress tests with a clean, native-style UI.
 
-![Crucible](packaging/linux/io.github.sugarycandybar.Crucible.svg)
+It keeps hardware monitoring and testing simple: view detailed system information, benchmark your hardware, and monitor temperatures and performance in real time, all in one place.
 
-## Features
+## Why Crucible?
 
-- **Specs** — See your CPU, GPU, memory, and OS details at a glance
-- **Copy Specs** — Copy a formatted Markdown spec sheet to share
-- **Stress Testing** — Run CPU stress tests with configurable workers and duration
-- **Live Monitoring** — Watch temperature and frequency in real time
-- **Safety Cutoff** — Automatically stops tests if temperatures get too high
+- Easy to use: view your hardware specs and run stress tests without complex tools or configuration.
+- Real-time monitoring: watch CPU/GPU temperatures, frequencies, and usage live during stress tests.
+- Safety built-in: automatic temperature cutoff prevents hardware damage during intensive testing.
+- Share specs easily: copy a formatted hardware report to share with others.
+- All in the app: specs, stress testing, live monitoring, and configuration in one place.
 
-## Requirements
+## Run Crucible
 
-- Python 3.10+
-- GTK 4
-- libadwaita 1.x
-- psutil
-- stress-ng (for stress testing)
+[![Download on Flathub](https://flathub.org/assets/badges/flathub-badge-en.png)](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible)
 
-## Running from Source
+- Linux: use the Flatpak release from [Flathub](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible).
+
+<details>
+<summary>Run from source (Python)</summary>
+
+### Linux
+
+1. Install GTK4/libadwaita system packages:
 
 ```bash
-# Install dependencies (Fedora)
+# Fedora
 sudo dnf install gtk4-devel libadwaita-devel python3-psutil stress-ng
 
-# Install dependencies (Ubuntu/Debian)
+# Ubuntu/Debian
 sudo apt install libgtk-4-dev libadwaita-1-dev python3-psutil stress-ng
+```
 
-# Run
+2. Run Crucible:
+
+```bash
 python3 crucible.py
 ```
 
-## Building the Flatpak
+### Building the Flatpak
 
 ```bash
 flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.sugarycandybar.Crucible.yml
 flatpak run io.github.sugarycandybar.Crucible
 ```
+
+</details>
+
+## Screenshots
+
+<p align="center">
+	<img src="packaging/linux/screenshots/specs.png" alt="Hardware specs view" width="900" />
+</p>
+
+- Specs: view CPU, GPU, memory, and OS details at a glance.
+
+<p align="center">
+	<img src="packaging/linux/screenshots/stability.png" alt="Stress testing and monitoring view" width="900" />
+</p>
+
+- Stability: run stress tests and monitor temperatures, frequency, and usage in real time.
 
 ## License
 

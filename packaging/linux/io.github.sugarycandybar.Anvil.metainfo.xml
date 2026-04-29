@@ -18,7 +18,7 @@
       <li>View CPU, GPU, and memory details at a glance</li>
       <li>Copy a spec sheet to share with others</li>
       <li>Run CPU stress tests with configurable duration</li>
-      <li>Monitor temperature and frequency in real time</li>
+      <li>Monitor temperature and usage in real time</li>
       <li>Automatic safety cutoff when temperatures get too high</li>
     </ul>
   </description>

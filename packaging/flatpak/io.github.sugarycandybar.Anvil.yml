@@ -44,4 +44,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/sugarycandybar/Anvil.git
-        commit: b7643fb01ad2c379a53aa0855a87d9d58d195962
+        commit: cfafbb2b6dcf4f8f71dce660a27ef1cd86c02881

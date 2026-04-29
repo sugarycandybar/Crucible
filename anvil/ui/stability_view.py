@@ -81,6 +81,7 @@ class StabilityView(Gtk.ScrolledWindow):
         self._usage_row.add_prefix(
             Gtk.Image.new_from_icon_name(
                 _pick_icon_name(
+                    "processor-symbolic",
                     "utilities-system-monitor-symbolic",
                     "computer-symbolic",
                 )

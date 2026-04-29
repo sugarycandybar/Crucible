@@ -1,5 +1,5 @@
 """
-AnvilApplication — Main Adw.Application subclass.
+CrucibleApplication — Main Adw.Application subclass.
 Handles app lifecycle, CSS loading, actions, and stress-ng cleanup.
 """
 from pathlib import Path
@@ -9,19 +9,19 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gio, Gdk  # noqa: E402
 
-from anvil.version import __version__
-from anvil.backend.hardware import gather_specs
-from anvil.backend.monitor import SystemMonitor
-from anvil.backend.stress import StressManager
-from anvil.ui.window import AnvilWindow
+from crucible.version import __version__
+from crucible.backend.hardware import gather_specs
+from crucible.backend.monitor import SystemMonitor
+from crucible.backend.stress import StressManager
+from crucible.ui.window import CrucibleWindow
 
 
-APP_ID = "io.github.sugarycandybar.Anvil"
-APP_NAME = "Anvil"
+APP_ID = "io.github.sugarycandybar.Crucible"
+APP_NAME = "Crucible"
 
 
-class AnvilApplication(Adw.Application):
-    """Main Anvil application."""
+class CrucibleApplication(Adw.Application):
+    """Main Crucible application."""
 
     def __init__(self):
         super().__init__(
@@ -44,7 +44,7 @@ class AnvilApplication(Adw.Application):
     def do_activate(self):
         """Show the main window."""
         if not self._window:
-            self._window = AnvilWindow(
+            self._window = CrucibleWindow(
                 specs=self._specs,
                 monitor=self._monitor,
                 stress=self._stress,
@@ -99,8 +99,8 @@ class AnvilApplication(Adw.Application):
             application_icon=APP_ID,
             version=__version__,
             developer_name="Sugarycandybar",
-            website="https://github.com/sugarycandybar/Anvil",
-            issue_url="https://github.com/sugarycandybar/Anvil/issues",
+            website="https://github.com/sugarycandybar/Crucible",
+            issue_url="https://github.com/sugarycandybar/Crucible/issues",
             license_type=Gtk.License.GPL_3_0,
             comments="View hardware specs and stress test your system.",
         )

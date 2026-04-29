@@ -8,13 +8,13 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gdk, Gio  # noqa: E402
 
-from anvil.backend.hardware import SystemSpecs
-from anvil.backend.monitor import MonitorSnapshot, SystemMonitor
-from anvil.backend.stress import StressManager
-from anvil.ui.widgets.temp_gauge import TempGauge
+from crucible.backend.hardware import SystemSpecs
+from crucible.backend.monitor import MonitorSnapshot, SystemMonitor
+from crucible.backend.stress import StressManager
+from crucible.ui.widgets.temp_gauge import TempGauge
 
 
-_SETTINGS_SCHEMA = "io.github.sugarycandybar.Anvil.Stability"
+_SETTINGS_SCHEMA = "io.github.sugarycandybar.Crucible.Stability"
 
 
 # Duration choices: label → seconds (0 = until stopped)

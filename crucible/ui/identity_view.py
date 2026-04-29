@@ -8,7 +8,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gdk  # noqa: E402
 
-from anvil.backend.hardware import SystemSpecs
+from crucible.backend.hardware import SystemSpecs
 
 
 class IdentityView(Gtk.ScrolledWindow):

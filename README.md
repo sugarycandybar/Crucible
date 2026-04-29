@@ -1,8 +1,8 @@
-# Anvil
+# Crucible
 
 View hardware specs and stress test your system.
 
-![Anvil](packaging/linux/io.github.sugarycandybar.Anvil.svg)
+![Crucible](packaging/linux/io.github.sugarycandybar.Crucible.svg)
 
 ## Features
 
@@ -30,14 +30,14 @@ sudo dnf install gtk4-devel libadwaita-devel python3-psutil stress-ng
 sudo apt install libgtk-4-dev libadwaita-1-dev python3-psutil stress-ng
 
 # Run
-python3 anvil.py
+python3 crucible.py
 ```
 
 ## Building the Flatpak
 
 ```bash
-flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.sugarycandybar.Anvil.yml
-flatpak run io.github.sugarycandybar.Anvil
+flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.sugarycandybar.Crucible.yml
+flatpak run io.github.sugarycandybar.Crucible
 ```
 
 ## License

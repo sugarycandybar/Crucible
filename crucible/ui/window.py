@@ -1,16 +1,16 @@
 """
-AnvilWindow — Main window with ViewStack for Identity and Stability views.
+CrucibleWindow — Main window with ViewStack for Identity and Stability views.
 """
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gio, GLib, GObject, Gdk  # noqa: E402
 
-from anvil.backend.hardware import SystemSpecs
-from anvil.backend.monitor import SystemMonitor
-from anvil.backend.stress import StressManager
-from anvil.ui.identity_view import IdentityView
-from anvil.ui.stability_view import StabilityView
+from crucible.backend.hardware import SystemSpecs
+from crucible.backend.monitor import SystemMonitor
+from crucible.backend.stress import StressManager
+from crucible.ui.identity_view import IdentityView
+from crucible.ui.stability_view import StabilityView
 
 
 def _pick_icon_name(*candidates: str) -> str:
@@ -24,8 +24,8 @@ def _pick_icon_name(*candidates: str) -> str:
     return candidates[-1] if candidates else "image-missing"
 
 
-class AnvilWindow(Adw.ApplicationWindow):
-    """Main Anvil window with two views."""
+class CrucibleWindow(Adw.ApplicationWindow):
+    """Main Crucible window with two views."""
 
     def __init__(
         self,
@@ -38,7 +38,7 @@ class AnvilWindow(Adw.ApplicationWindow):
         self._monitor = monitor
         self._stress = stress
 
-        self.set_title("Anvil")
+        self.set_title("Crucible")
         self.set_default_size(520, 720)
         self.set_size_request(360, 480)
 
@@ -59,7 +59,7 @@ class AnvilWindow(Adw.ApplicationWindow):
         menu_button = Gtk.MenuButton()
         menu_button.set_icon_name("open-menu-symbolic")
         menu_model = Gio.Menu()
-        menu_model.append("About Anvil", "app.about")
+        menu_model.append("About Crucible", "app.about")
         menu_model.append("Quit", "app.quit")
         menu_button.set_menu_model(menu_model)
         header.pack_end(menu_button)

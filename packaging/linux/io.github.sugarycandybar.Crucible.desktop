@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=Anvil
+Name=Crucible
 Comment=View specs and stress test hardware
-Exec=anvil
-Icon=io.github.sugarycandybar.Anvil
+Exec=crucible
+Icon=io.github.sugarycandybar.Crucible
 Terminal=false
 Categories=System;Monitor;Utility
 Keywords=hardware;specs;stress;test;cpu;temperature;benchmark;gpu;ram;

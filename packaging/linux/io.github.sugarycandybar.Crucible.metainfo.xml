@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.sugarycandybar.Anvil</id>
-  <name>Anvil</name>
+  <id>io.github.sugarycandybar.Crucible</id>
+  <name>Crucible</name>
   <summary>View specs and stress test hardware</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
@@ -11,7 +11,7 @@
   <update_contact>139514123+sugarycandybar@users.noreply.github.com</update_contact>
   <description>
     <p>
-      Anvil gives you a clear overview of your system hardware and lets you
+      Crucible gives you a clear overview of your system hardware and lets you
       push it to its limits with built-in stress testing.
     </p>
     <ul>
@@ -42,10 +42,10 @@
     <color type="primary" scheme_preference="light">#62a0ea</color>
     <color type="primary" scheme_preference="dark">#241f31</color>
   </branding>
-  <launchable type="desktop-id">io.github.sugarycandybar.Anvil.desktop</launchable>
-  <url type="homepage">https://github.com/sugarycandybar/Anvil</url>
-  <url type="bugtracker">https://github.com/sugarycandybar/Anvil/issues</url>
-  <url type="vcs-browser">https://github.com/sugarycandybar/Anvil</url>
+  <launchable type="desktop-id">io.github.sugarycandybar.Crucible.desktop</launchable>
+  <url type="homepage">https://github.com/sugarycandybar/Crucible</url>
+  <url type="bugtracker">https://github.com/sugarycandybar/Crucible/issues</url>
+  <url type="vcs-browser">https://github.com/sugarycandybar/Crucible</url>
   <releases>
     <release version="1.0.0" date="2026-04-28">
       <description>

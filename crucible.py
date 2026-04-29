@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Anvil - Hardware Specs & Stress Testing
+Crucible - Hardware Specs & Stress Testing
 A libadwaita application for viewing system hardware
 and running stress tests.
 """
 import sys
 
-from anvil.ui.application import AnvilApplication
+from crucible.ui.application import CrucibleApplication
 
 
 def main():
-    """Launch the Anvil application."""
-    app = AnvilApplication()
+    """Launch the Crucible application."""
+    app = CrucibleApplication()
     return app.run(sys.argv)
 
 

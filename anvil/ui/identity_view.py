@@ -64,7 +64,7 @@ class IdentityView(Gtk.ScrolledWindow):
             cpu_group.add(self._make_row(
                 "Max Frequency",
                 f"{specs.cpu_freq_max_ghz:.2f} GHz",
-                "media-playlist-consecutive-symbolic",
+                "arrow-pointing-at-line-up-symbolic",
             ))
         content.append(cpu_group)
 
@@ -81,7 +81,7 @@ class IdentityView(Gtk.ScrolledWindow):
                 gpu_group.add(self._make_row(
                     f"GPU {i}",
                     gpu.name,
-                    "video-display-symbolic",
+                    "pci-card-symbolic",
                     subtitle=subtitle,
                 ))
         else:
@@ -99,7 +99,7 @@ class IdentityView(Gtk.ScrolledWindow):
         mem_group.add(self._make_row(
             "Total RAM",
             f"{ram_total_gb:.1f} GB",
-            "drive-harddisk-solidstate-symbolic",
+            "memory-symbolic",
         ))
         content.append(mem_group)
 

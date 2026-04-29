@@ -33,6 +33,12 @@ modules:
       - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.metainfo.xml /app/share/metainfo/io.github.sugarycandybar.Anvil.metainfo.xml
       - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.svg /app/share/icons/hicolor/scalable/apps/io.github.sugarycandybar.Anvil.svg
       - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil-symbolic.svg /app/share/icons/hicolor/symbolic/apps/io.github.sugarycandybar.Anvil-symbolic.svg
+      - install -Dm644 packaging/linux/scalable/apps/processor-symbolic.svg /app/share/icons/hicolor/scalable/apps/processor-symbolic.svg
+      - install -Dm644 packaging/linux/scalable/apps/pci-card-symbolic.svg /app/share/icons/hicolor/scalable/apps/pci-card-symbolic.svg
+      - install -Dm644 packaging/linux/scalable/apps/memory-symbolic.svg /app/share/icons/hicolor/scalable/apps/memory-symbolic.svg
+      - install -Dm644 packaging/linux/scalable/apps/arrow-pointing-at-line-up-symbolic.svg /app/share/icons/hicolor/scalable/apps/arrow-pointing-at-line-up-symbolic.svg
+      - install -Dm644 packaging/linux/scalable/apps/stop-sign-large-symbolic.svg /app/share/icons/hicolor/scalable/apps/stop-sign-large-symbolic.svg
+      - install -Dm644 packaging/linux/scalable/apps/thermometer-symbolic.svg /app/share/icons/hicolor/scalable/apps/thermometer-symbolic.svg
       - install -Dm644 packaging/linux/io.github.sugarycandybar.Anvil.Stability.gschema.xml /app/share/glib-2.0/schemas/io.github.sugarycandybar.Anvil.Stability.gschema.xml
       - glib-compile-schemas /app/share/glib-2.0/schemas/
     sources:

@@ -94,7 +94,7 @@ class StabilityView(Gtk.ScrolledWindow):
         # RAM row
         self._ram_row = Adw.ActionRow(title="Memory Usage")
         self._ram_row.add_prefix(
-            Gtk.Image.new_from_icon_name("drive-harddisk-solidstate-symbolic")
+            Gtk.Image.new_from_icon_name("memory-symbolic")
         )
         self._ram_label = Gtk.Label(label="—", css_classes=["dim-label"])
         self._ram_row.add_suffix(self._ram_label)
@@ -135,6 +135,7 @@ class StabilityView(Gtk.ScrolledWindow):
         self._stop_at_temp_row.add_prefix(
             Gtk.Image.new_from_icon_name(
                 _pick_icon_name(
+                    "stop-sign-large-symbolic",
                     "temperature-high-symbolic",
                     "dialog-warning-symbolic",
                 )

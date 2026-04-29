@@ -27,6 +27,7 @@ class TempGauge(Adw.ActionRow):
         self.add_prefix(
             Gtk.Image.new_from_icon_name(
                 _pick_icon_name(
+                    "thermometer-symbolic",
                     "sensors-temperature-symbolic",
                     "temperature-high-symbolic",
                     "weather-clear-symbolic",

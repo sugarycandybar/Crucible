@@ -1,10 +1,10 @@
 [Desktop Entry]
 Type=Application
 Name=Anvil
-Comment=View hardware specs and stress test your system
+Comment=View specs and stress test hardware
 Exec=anvil
 Icon=io.github.sugarycandybar.Anvil
 Terminal=false
-Categories=System;Monitor;
+Categories=System;Monitor;Utility
 Keywords=hardware;specs;stress;test;cpu;temperature;benchmark;gpu;ram;
 StartupNotify=true

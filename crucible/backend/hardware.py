@@ -110,7 +110,7 @@ def _get_cpu_model() -> str:
     try:
         with open("/proc/cpuinfo") as f:
             for line in f:
-                if line.startswith("model name"):
+                if line.startswith("model name") or line.startswith("Processor"):
                     return line.split(":", 1)[1].strip()
     except OSError:
         pass

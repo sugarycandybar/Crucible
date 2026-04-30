@@ -8,7 +8,6 @@ finish-args:
   - --socket=wayland
   - --socket=fallback-x11
   - --device=dri
-  - --filesystem=/proc:ro
   - --filesystem=/sys:ro
 modules:
   - python3-requirements.json
@@ -43,4 +42,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/sugarycandybar/Crucible.git
-        commit: af5d2ec761f301f9286c130205bb74afc7046546
+        commit: 3e990cb28296f82f3de36024e5f3d6ec4e3389b8

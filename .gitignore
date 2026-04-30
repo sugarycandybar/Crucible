@@ -42,3 +42,6 @@ Thumbs.db
 .flatpak-builder/
 build-dir/
 repo/
+
+# Compiled GLib schemas
+gschemas.compiled

@@ -46,6 +46,24 @@
   <url type="homepage">https://github.com/sugarycandybar/Crucible</url>
   <url type="bugtracker">https://github.com/sugarycandybar/Crucible/issues</url>
   <url type="vcs-browser">https://github.com/sugarycandybar/Crucible</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/master/packaging/linux/screenshots/stress%20test.png</image>
+      <caption>Stress test dashboard with live monitoring</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/master/packaging/linux/screenshots/whole%20specs.png</image>
+      <caption>Complete hardware specs overview</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/master/packaging/linux/screenshots/specs%20top.png</image>
+      <caption>CPU and system information</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/master/packaging/linux/screenshots/specs%20bottom.png</image>
+      <caption>Memory and hardware details</caption>
+    </screenshot>
+  </screenshots>
   <releases>
     <release version="1.0.0" date="2026-04-28">
       <description>

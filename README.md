@@ -14,10 +14,6 @@ It keeps hardware monitoring and testing simple: view detailed system informatio
 
 ## Run Crucible
 
-[![Download on Flathub](https://flathub.org/assets/badges/flathub-badge-en.png)](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible)
-
-- Linux: use the Flatpak release from [Flathub](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible).
-
 <details>
 <summary>Run from source (Python)</summary>
 
@@ -51,16 +47,28 @@ flatpak run io.github.sugarycandybar.Crucible
 ## Screenshots
 
 <p align="center">
-	<img src="packaging/linux/screenshots/specs.png" alt="Hardware specs view" width="900" />
+	<img src="packaging/linux/screenshots/stress%20test.png" alt="Stress testing and monitoring view" width="900" />
 </p>
 
-- Specs: view CPU, GPU, memory, and OS details at a glance.
+- **Stress Test**: run stress tests and monitor temperatures, frequency, and usage in real time.
 
 <p align="center">
-	<img src="packaging/linux/screenshots/stability.png" alt="Stress testing and monitoring view" width="900" />
+	<img src="packaging/linux/screenshots/whole%20specs.png" alt="Full specs view" width="900" />
 </p>
 
-- Stability: run stress tests and monitor temperatures, frequency, and usage in real time.
+- **Specs (Full)**: complete hardware overview with CPU, GPU, memory, and OS details.
+
+<p align="center">
+	<img src="packaging/linux/screenshots/specs%20top.png" alt="Specs top section" width="900" />
+</p>
+
+- **Specs (Top)**: CPU and system information at a glance.
+
+<p align="center">
+	<img src="packaging/linux/screenshots/specs%20bottom.png" alt="Specs bottom section" width="900" />
+</p>
+
+- **Specs (Bottom)**: memory, OS, and additional hardware details.
 
 ## License
 

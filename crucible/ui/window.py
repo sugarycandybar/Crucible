@@ -39,7 +39,7 @@ class CrucibleWindow(Adw.ApplicationWindow):
         self._stress = stress
 
         self.set_title("Crucible")
-        self.set_default_size(520, 720)
+        self.set_default_size(520, 600)
         self.set_size_request(360, 480)
 
         # --- Toast overlay wraps everything ---
@@ -92,6 +92,9 @@ class CrucibleWindow(Adw.ApplicationWindow):
                 "computer-symbolic",
             ),
         )
+
+        # Set stress test as the default visible page
+        self._view_stack.set_visible_child_name("stability")
 
         self._view_switcher_title.set_stack(self._view_stack)
         self._toolbar_view.set_content(self._view_stack)

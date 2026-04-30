@@ -56,7 +56,7 @@ flatpak run io.github.sugarycandybar.Crucible
 	<img src="packaging/linux/screenshots/whole_specs.png" alt="Full specs view" width="450" />
 </p>
 
-- **Specs (Full)**: complete hardware overview with CPU, GPU, memory, and OS details.
+- **Specs**: complete hardware overview with CPU, GPU, memory, and OS details.
 
 ## License
 

@@ -5,6 +5,6 @@ Comment=View specs and stress test hardware
 Exec=crucible
 Icon=io.github.sugarycandybar.Crucible
 Terminal=false
-Categories=System;Monitor;Utility
+Categories=System;Monitor;
 Keywords=hardware;specs;stress;test;cpu;temperature;benchmark;gpu;ram;
 StartupNotify=true

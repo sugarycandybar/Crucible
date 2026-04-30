@@ -9,8 +9,7 @@ finish-args:
   - --socket=fallback-x11
   - --device=dri
   - --filesystem=/proc:ro
-  - --filesystem=/sys:rw
-  - --talk-name=org.freedesktop.Notifications
+  - --filesystem=/sys:ro
 modules:
   - python3-requirements.json
   - name: stress-ng

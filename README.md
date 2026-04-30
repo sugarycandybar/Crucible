@@ -47,25 +47,25 @@ flatpak run io.github.sugarycandybar.Crucible
 ## Screenshots
 
 <p align="center">
-	<img src="packaging/linux/screenshots/stress%20test.png" alt="Stress testing and monitoring view" width="900" />
+	<img src="packaging/linux/screenshots/stress_test.png" alt="Stress testing and monitoring view" width="900" />
 </p>
 
 - **Stress Test**: run stress tests and monitor temperatures, frequency, and usage in real time.
 
 <p align="center">
-	<img src="packaging/linux/screenshots/whole%20specs.png" alt="Full specs view" width="900" />
+	<img src="packaging/linux/screenshots/whole_specs.png" alt="Full specs view" width="900" />
 </p>
 
 - **Specs (Full)**: complete hardware overview with CPU, GPU, memory, and OS details.
 
 <p align="center">
-	<img src="packaging/linux/screenshots/specs%20top.png" alt="Specs top section" width="900" />
+	<img src="packaging/linux/screenshots/specs_top.png" alt="Specs top section" width="900" />
 </p>
 
 - **Specs (Top)**: CPU and system information at a glance.
 
 <p align="center">
-	<img src="packaging/linux/screenshots/specs%20bottom.png" alt="Specs bottom section" width="900" />
+	<img src="packaging/linux/screenshots/specs_bottom.png" alt="Specs bottom section" width="900" />
 </p>
 
 - **Specs (Bottom)**: memory, OS, and additional hardware details.

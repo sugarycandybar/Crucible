@@ -11,9 +11,9 @@
             ],
             "sources": [
                 {
-                    "type": "archive",
+                    "type": "file",
                     "url": "https://files.pythonhosted.org/packages/aa/c6/d1ddf4abb55e93cebc4f2ed8b5d6dbad109ecb8d63748dd2b20ab5e57ebe/psutil-7.2.2.tar.gz",
-                    "sha256": "0746f5f8d406af344fd547f1c8daa5f5c3dbc293bb8d6a16d80b4bb88f59372"
+                    "sha256": "0746f5f8d406af344fd547f1c8daa5f5c33dbc293bb8d6a16d80b4bb88f59372"
                 }
             ]
         }

@@ -71,10 +71,21 @@ class CrucibleApplication(Adw.Application):
             )
 
     def _register_packaged_icons(self):
-        """Make packaged icons discoverable during development."""
+        """Make packaged icons discoverable."""
         display = Gdk.Display.get_default()
         if not display:
             return
+            
+        icon_theme = Gtk.IconTheme.get_for_display(display)
+        
+        # Load GResource if installed
+        resource_path = Path(__file__).resolve().parents[2] / "crucible-resources.gresource"
+        if resource_path.exists():
+            resource = Gio.Resource.load(str(resource_path))
+            Gio.resources_register(resource)
+            icon_theme.add_resource_path("/io/github/sugarycandybar/Crucible/icons")
+
+        # Load from source tree during development
         icon_dir = Path(__file__).resolve().parents[2] / "packaging" / "linux"
         if icon_dir.exists():
             icon_theme = Gtk.IconTheme.get_for_display(display)

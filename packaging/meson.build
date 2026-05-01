@@ -13,20 +13,13 @@ install_data('linux/io.github.sugarycandybar.Crucible-symbolic.svg',
   install_dir: join_paths(datadir, 'icons/hicolor/symbolic/apps')
 )
 
-scalable_icons = [
-  'processor-symbolic.svg',
-  'pci-card-symbolic.svg',
-  'memory-symbolic.svg',
-  'arrow-pointing-at-line-up-symbolic.svg',
-  'stop-sign-large-symbolic.svg',
-  'thermometer-symbolic.svg'
-]
-
-foreach icon : scalable_icons
-  install_data(join_paths('linux/scalable/apps', icon),
-    install_dir: join_paths(datadir, 'icons/hicolor/scalable/apps')
-  )
-endforeach
+gnome.compile_resources(
+  'crucible-resources',
+  'io.github.sugarycandybar.Crucible.src.gresource.xml',
+  gresource_bundle: true,
+  install: true,
+  install_dir: pkgdatadir
+)
 
 install_data('linux/io.github.sugarycandybar.Crucible.Stability.gschema.xml',
   install_dir: join_paths(datadir, 'glib-2.0/schemas')

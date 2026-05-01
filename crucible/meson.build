@@ -5,7 +5,8 @@ install_subdir('.',
 )
 
 install_data('../crucible.py',
-  install_dir: datadir,
+  rename: 'main.py',
+  install_dir: pkgdatadir,
   install_mode: 'rwxr-xr-x'
 )
 

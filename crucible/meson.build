@@ -5,7 +5,8 @@ install_subdir('.',
 )
 
 install_data('../crucible.py',
-  install_dir: pkgdatadir
+  install_dir: datadir,
+  install_mode: 'rwxr-xr-x'
 )
 
 install_data('../packaging/flatpak/crucible-wrapper.sh',

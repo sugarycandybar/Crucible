@@ -5,8 +5,10 @@ project('crucible',
 
 gnome = import('gnome')
 
-bindir = get_option('bindir')
-datadir = get_option('datadir')
+prefix = get_option('prefix')
+bindir = prefix / get_option('bindir')
+datadir = prefix / get_option('datadir')
+localedir = prefix / get_option('localedir')
 pkgdatadir = datadir / meson.project_name()
 
 subdir('crucible')

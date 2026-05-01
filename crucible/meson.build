@@ -1,5 +1,6 @@
 install_subdir('.',
   exclude_files: ['meson.build'],
+  exclude_directories: ['__pycache__'],
   install_dir: pkgdatadir,
   strip_directory: true
 )

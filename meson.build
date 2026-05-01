@@ -5,10 +5,9 @@ project('crucible',
 
 gnome = import('gnome')
 
-prefix = get_option('prefix')
-bindir = join_paths(prefix, get_option('bindir'))
-datadir = join_paths(prefix, get_option('datadir'))
-pkgdatadir = join_paths(datadir, 'crucible')
+bindir = get_option('bindir')
+datadir = get_option('datadir')
+pkgdatadir = datadir / meson.project_name()
 
 subdir('crucible')
 subdir('packaging')

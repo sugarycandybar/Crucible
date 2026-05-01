@@ -79,11 +79,13 @@ class CrucibleApplication(Adw.Application):
         icon_theme = Gtk.IconTheme.get_for_display(display)
         
         # Load GResource if installed
-        resource_path = Path(__file__).resolve().parents[2] / "crucible-resources.gresource"
-        if resource_path.exists():
-            resource = Gio.Resource.load(str(resource_path))
-            Gio.resources_register(resource)
-            icon_theme.add_resource_path("/io/github/sugarycandybar/Crucible/icons")
+        for p in (Path(__file__).resolve().parents[1], Path(__file__).resolve().parents[2]):
+            resource_path = p / "crucible-resources.gresource"
+            if resource_path.exists():
+                resource = Gio.Resource.load(str(resource_path))
+                Gio.resources_register(resource)
+                icon_theme.add_resource_path("/io/github/sugarycandybar/Crucible/icons")
+                break
 
         # Load from source tree during development
         icon_dir = Path(__file__).resolve().parents[2] / "packaging" / "linux"

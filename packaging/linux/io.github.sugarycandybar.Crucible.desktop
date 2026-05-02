@@ -8,3 +8,4 @@ Terminal=false
 Categories=System;Monitor;
 Keywords=hardware;specs;stress;test;cpu;temperature;benchmark;gpu;ram;
 StartupNotify=true
+StartupWMClass=io.github.sugarycandybar.Crucible

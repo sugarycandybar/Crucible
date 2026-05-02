@@ -23,5 +23,6 @@ modules:
   - name: crucible
     buildsystem: meson
     sources:
-      - type: dir
-        path: ../../
+      - type: git
+        url: https://github.com/sugarycandybar/Crucible.git
+        commit: 0025f04f030a90aeba5fb1f56864638c26a65973

@@ -8,7 +8,7 @@
   <developer id="io.github.sugarycandybar">
     <name>Sugarycandybar</name>
   </developer>
-  <update_contact>139514123+sugarycandybar@users.noreply.github.com</update_contact>
+  <update_contact>candybaralt@gmail.com</update_contact>
   <description>
     <p>
       Crucible gives you a clear overview of your system hardware and lets you
@@ -38,8 +38,8 @@
     <keyword>ram</keyword>
   </keywords>
   <branding>
-    <color type="primary" scheme_preference="light">#62a0ea</color>
-    <color type="primary" scheme_preference="dark">#241f31</color>
+    <color type="primary" scheme_preference="light">#ff7800</color>
+    <color type="primary" scheme_preference="dark">#1a2b3c</color>
   </branding>
   <launchable type="desktop-id">io.github.sugarycandybar.Crucible.desktop</launchable>
   <url type="homepage">https://github.com/sugarycandybar/Crucible</url>
@@ -64,7 +64,7 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.0.0" date="2026-04-28">
+    <release version="1.0.0" date="2026-06-01">
       <description>
         <p>Initial release</p>
       </description>

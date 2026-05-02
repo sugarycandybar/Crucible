@@ -14,10 +14,8 @@ pkgdatadir = '@pkgdatadir@'
 localedir = '@localedir@'
 datadir = '@datadir@'
 
-# Add datadir to sys.path so 'import crucible.ui...' works properly
 sys.path.insert(1, datadir)
 
-# If running from source, ensure schemas are compiled and GSETTINGS_SCHEMA_DIR is set
 if not os.path.exists(pkgdatadir):
     base_dir = Path(__file__).resolve().parent
     schema_dir = base_dir / "packaging" / "linux"

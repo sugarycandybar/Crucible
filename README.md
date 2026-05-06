@@ -14,6 +14,8 @@ It keeps hardware monitoring and testing simple: view detailed system informatio
 
 ## Run Crucible
 
+[![Download on Flathub](https://flathub.org/assets/badges/flathub-badge-en.png)](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible)
+
 <details>
 <summary>Run from source (Python)</summary>
 

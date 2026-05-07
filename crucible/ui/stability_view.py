@@ -263,8 +263,6 @@ class StabilityView(Gtk.ScrolledWindow):
             self._stress.stop()
             self._was_running = False
             self.refresh_button_state()
-            if self._toast_fn:
-                self._toast_fn("Test stopped")
             return
 
         _, duration_secs = _DURATIONS[self._duration_row.get_selected()]
@@ -273,8 +271,6 @@ class StabilityView(Gtk.ScrolledWindow):
         if ok:
             self._was_running = True
             self.refresh_button_state()
-            if self._toast_fn:
-                self._toast_fn("Test started")
         else:
             if self._toast_fn:
                 self._toast_fn("Could not start stress-ng")

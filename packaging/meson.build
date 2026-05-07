@@ -9,6 +9,9 @@ install_data('linux/io.github.sugarycandybar.Crucible.metainfo.xml',
 install_data('linux/io.github.sugarycandybar.Crucible.svg',
   install_dir: datadir / 'icons' / 'hicolor' / 'scalable' / 'apps'
 )
+install_data('linux/io.github.sugarycandybar.Hosty.svg',
+  install_dir: datadir / 'icons' / 'hicolor' / 'scalable' / 'apps'
+)
 install_data('linux/io.github.sugarycandybar.Crucible-symbolic.svg',
   install_dir: datadir / 'icons' / 'hicolor' / 'symbolic' / 'apps'
 )

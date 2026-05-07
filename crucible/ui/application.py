@@ -117,6 +117,17 @@ class CrucibleApplication(Adw.Application):
             license_type=Gtk.License.GPL_3_0,
             comments="View hardware specs and stress test your system.",
         )
+        dialog.add_acknowledgement_section(
+            "Acknowledgements",
+            [
+                "stress-ng https://github.com/ColinIanKing/stress-ng"
+            ]
+        )
+        dialog.add_other_app(
+            "io.github.sugarycandybar.Hosty",
+            "Hosty",
+            "Host Minecraft servers"
+        )
         dialog.present(self._window)
 
     def _on_quit(self, _action, _param):

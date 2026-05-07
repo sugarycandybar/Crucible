@@ -6,7 +6,7 @@ from __future__ import annotations
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gdk  # noqa: E402
+from gi.repository import Gtk, Adw, Gdk, GLib  # noqa: E402
 
 from crucible.backend.hardware import SystemSpecs
 
@@ -107,25 +107,22 @@ class IdentityView(Gtk.ScrolledWindow):
         button_bin = Adw.Bin()
         button_bin.set_margin_top(8)
 
-        copy_button = Gtk.Button(label="Copy Specs")
-        copy_button.set_hexpand(True)
-        copy_button.set_halign(Gtk.Align.FILL)
-        copy_button.add_css_class("suggested-action")
-        copy_button.add_css_class("button-row")
-        copy_button.set_tooltip_text("Copy hardware specs as plain text")
+        self._copy_button = Gtk.Button()
+        self._copy_button.set_hexpand(True)
+        self._copy_button.set_halign(Gtk.Align.FILL)
+        self._copy_button.add_css_class("suggested-action")
+        self._copy_button.add_css_class("button-row")
+        self._copy_button.set_tooltip_text("Copy hardware specs as plain text")
 
-        copy_button_content = Gtk.Box(
-            orientation=Gtk.Orientation.HORIZONTAL,
-            spacing=8,
-            halign=Gtk.Align.CENTER,
+        self._copy_button_content = Adw.ButtonContent(
+            icon_name="edit-copy-symbolic",
+            label="Copy Specs"
         )
-        copy_button_content.append(Gtk.Image.new_from_icon_name("edit-copy-symbolic"))
-        copy_button_content.append(Gtk.Label(label="Copy Specs"))
-        copy_button.set_child(copy_button_content)
+        self._copy_button.set_child(self._copy_button_content)
 
-        copy_button.connect("clicked", self._on_copy_clicked)
+        self._copy_button.connect("clicked", self._on_copy_clicked)
 
-        button_bin.set_child(copy_button)
+        button_bin.set_child(self._copy_button)
         content.append(button_bin)
 
         clamp.set_child(content)
@@ -176,5 +173,15 @@ class IdentityView(Gtk.ScrolledWindow):
         text = self._specs.to_plain_text()
         clipboard = Gdk.Display.get_default().get_clipboard()
         clipboard.set(text)
-        if self._toast_fn:
-            self._toast_fn("Specs copied to clipboard")
+        
+        self._copy_button.add_css_class("success")
+        self._copy_button_content.set_label("Copied!")
+        self._copy_button_content.set_icon_name("object-select-symbolic")
+        
+        GLib.timeout_add(2000, self._reset_copy_button)
+
+    def _reset_copy_button(self) -> bool:
+        self._copy_button.remove_css_class("success")
+        self._copy_button_content.set_label("Copy Specs")
+        self._copy_button_content.set_icon_name("edit-copy-symbolic")
+        return False

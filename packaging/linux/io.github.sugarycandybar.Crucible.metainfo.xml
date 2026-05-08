@@ -64,6 +64,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.0.1" date="2026-05-07">
+      <description>
+        <p>Update about dialog and remove annoying toasts</p>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-05-01">
       <description>
         <p>Initial release</p>

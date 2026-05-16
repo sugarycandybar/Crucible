@@ -1,0 +1,17 @@
+[package]
+name = "crucible"
+version = "1.1.0"
+edition = "2021"
+authors = ["Sugarycandybar"]
+license = "GPL-3.0-or-later"
+description = "View hardware specs and stress test your system"
+
+[dependencies]
+gtk4 = { version = "0.9", features = ["v4_16"] }
+libadwaita = { version = "0.7", features = ["v1_7"] }
+gio = "0.20"
+glib = "0.20"
+cairo-rs = "0.20"
+
+regex = "1"
+libc = "0.2"

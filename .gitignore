@@ -1,30 +1,5 @@
-# Python bytecode and caches
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-.venv/
-venv/
-env/
-ENV/
-
-# Build and packaging output
-build/
-dist/
-*.egg-info/
-.eggs/
-pip-wheel-metadata/
-
-# Tool caches and coverage
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.tox/
-.nox/
-.coverage
-.coverage.*
-htmlcov/
+# Rust/Cargo build output
+target/
 
 # IDE/editor settings
 .vscode/
@@ -34,14 +9,13 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-.flake8
-
 # Flatpak local build artifacts
 .flatpak-builder/
 build-dir/
 repo/
+
+# Logs
+*.log
 
 # Compiled GLib schemas
 gschemas.compiled

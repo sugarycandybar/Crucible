@@ -17,24 +17,25 @@ It keeps hardware monitoring and testing simple: view detailed system informatio
 [![Download on Flathub](https://flathub.org/assets/badges/flathub-badge-en.png)](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible)
 
 <details>
-<summary>Run from source (Python)</summary>
+<summary>Build from source (Rust)</summary>
 
-### Linux
+### Prerequisites
 
-1. Install GTK4/libadwaita system packages:
+Install Rust via [rustup](https://rustup.rs/) or your package manager, and install the build dependencies:
 
 ```bash
 # Fedora
-sudo dnf install gtk4-devel libadwaita-devel python3-psutil stress-ng
+sudo dnf install gtk4-devel libadwaita-devel stress-ng
 
 # Ubuntu/Debian
-sudo apt install libgtk-4-dev libadwaita-1-dev python3-psutil stress-ng
+sudo apt install libgtk-4-dev libadwaita-1-dev stress-ng
 ```
 
-2. Run Crucible:
+### Build & Run
 
 ```bash
-python3 crucible.py
+cargo build --release
+./target/release/crucible
 ```
 
 ### Building the Flatpak
@@ -49,13 +50,13 @@ flatpak run io.github.sugarycandybar.Crucible
 ## Screenshots
 
 <p align="center">
-	<img src="packaging/linux/screenshots/stress_test.png" alt="Stress testing and monitoring view" width="450" />
+	<img src="data/screenshots/stress_test.png" alt="Stress testing and monitoring view" width="450" />
 </p>
 
 - **Stress Test**: run stress tests and monitor temperature and usage in real time.
 
 <p align="center">
-	<img src="packaging/linux/screenshots/whole_specs.png" alt="Full specs view" width="450" />
+	<img src="data/screenshots/whole_specs.png" alt="Full specs view" width="450" />
 </p>
 
 - **Specs**: complete hardware overview with CPU, GPU, memory, and OS details.

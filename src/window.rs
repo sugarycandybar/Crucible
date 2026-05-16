@@ -10,7 +10,6 @@ use crate::backend::stress::StressManager;
 use crate::identity_view;
 use crate::stability_view;
 
-#[allow(deprecated)]
 pub fn create_window(
     specs: SystemSpecs,
     monitor: Rc<RefCell<SystemMonitor>>,
@@ -21,7 +20,8 @@ pub fn create_window(
 ) {
     let window = libadwaita::ApplicationWindow::new(app);
     window.set_title(Some("Crucible"));
-    window.set_default_size(520, 600);
+    window.set_default_width(520);
+    window.set_default_height(600);
     window.set_size_request(360, 480);
 
     let toast_overlay = libadwaita::ToastOverlay::new();
@@ -31,8 +31,9 @@ pub fn create_window(
     let header = libadwaita::HeaderBar::new();
     header.add_css_class("flat");
 
-    let view_switcher_title = libadwaita::ViewSwitcherTitle::new();
-    header.set_title_widget(Some(&view_switcher_title));
+    let view_switcher = libadwaita::ViewSwitcher::new();
+    view_switcher.set_policy(libadwaita::ViewSwitcherPolicy::Wide);
+    header.set_title_widget(Some(&view_switcher));
 
     // Menu button
     let menu_button = gtk4::MenuButton::new();
@@ -90,18 +91,8 @@ pub fn create_window(
 
     view_stack.set_visible_child_name("stability");
 
-    view_switcher_title.set_stack(Some(&view_stack));
+    view_switcher.set_stack(Some(&view_stack));
     toolbar_view.set_content(Some(&view_stack));
-
-    // Bottom switcher bar
-    let switcher_bar = libadwaita::ViewSwitcherBar::new();
-    switcher_bar.set_stack(Some(&view_stack));
-    toolbar_view.add_bottom_bar(&switcher_bar);
-
-    view_switcher_title.bind_property("title-visible", &switcher_bar, "reveal")
-        .sync_create()
-        .build();
-
 
     toast_overlay.set_child(Some(&toolbar_view));
     window.set_content(Some(&toast_overlay));

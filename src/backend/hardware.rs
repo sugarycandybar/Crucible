@@ -337,3 +337,113 @@ pub fn gather_specs() -> SystemSpecs {
         ram_total_bytes: get_total_ram(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ram_total_gb() {
+        let specs = SystemSpecs {
+            os_name: "TestOS".to_string(),
+            os_version: "1.0".to_string(),
+            kernel: "5.15.0".to_string(),
+            cpu_model: "Intel i7".to_string(),
+            cpu_cores_physical: 4,
+            cpu_cores_logical: 8,
+            cpu_freq_max_mhz: 3600.0,
+            gpus: vec![],
+            ram_total_bytes: 16_000_000_000,
+        };
+        assert_eq!(specs.ram_total_gb(), 16.0);
+    }
+
+    #[test]
+    fn test_cpu_freq_max_ghz() {
+        let mut specs = SystemSpecs {
+            os_name: "TestOS".to_string(),
+            os_version: "1.0".to_string(),
+            kernel: "5.15.0".to_string(),
+            cpu_model: "Intel i7".to_string(),
+            cpu_cores_physical: 4,
+            cpu_cores_logical: 8,
+            cpu_freq_max_mhz: 3600.0,
+            gpus: vec![],
+            ram_total_bytes: 16_000_000_000,
+        };
+        assert_eq!(specs.cpu_freq_max_ghz(), 3.6);
+
+        specs.cpu_freq_max_mhz = 0.0;
+        assert_eq!(specs.cpu_freq_max_ghz(), 0.0);
+    }
+
+    #[test]
+    fn test_to_plain_text() {
+        let specs_no_gpu = SystemSpecs {
+            os_name: "Ubuntu".to_string(),
+            os_version: "22.04".to_string(),
+            kernel: "5.15.0".to_string(),
+            cpu_model: "Intel Core i7-10700K".to_string(),
+            cpu_cores_physical: 8,
+            cpu_cores_logical: 16,
+            cpu_freq_max_mhz: 5100.0,
+            gpus: vec![],
+            ram_total_bytes: 16_000_000_000,
+        };
+        let text = specs_no_gpu.to_plain_text();
+        assert!(text.contains("OS: Ubuntu 22.04"));
+        assert!(text.contains("Kernel: 5.15.0"));
+        assert!(text.contains("CPU: Intel Core i7-10700K (8C/16T @ 5.10 GHz)"));
+        assert!(text.contains("GPU: Unknown"));
+        assert!(text.contains("RAM: 16.0 GB"));
+
+        let specs_with_gpu = SystemSpecs {
+            os_name: "Ubuntu 22.04 LTS".to_string(),
+            os_version: "22.04".to_string(),
+            kernel: "5.15.0".to_string(),
+            cpu_model: "Intel Core i7-10700K".to_string(),
+            cpu_cores_physical: 8,
+            cpu_cores_logical: 16,
+            cpu_freq_max_mhz: 5100.0,
+            gpus: vec![
+                GpuInfo {
+                    name: "NVIDIA GeForce RTX 3080".to_string(),
+                    vendor: "NVIDIA".to_string(),
+                    is_integrated: false,
+                },
+                GpuInfo {
+                    name: "Intel UHD Graphics 630".to_string(),
+                    vendor: "Intel".to_string(),
+                    is_integrated: true,
+                },
+            ],
+            ram_total_bytes: 16_000_000_000,
+        };
+        let text_with_gpu = specs_with_gpu.to_plain_text();
+        assert!(text_with_gpu.contains("OS: Ubuntu 22.04 LTS"));
+        assert!(text_with_gpu.contains("GPU 0: NVIDIA GeForce RTX 3080"));
+        assert!(text_with_gpu.contains("GPU 1: Intel UHD Graphics 630 (integrated)"));
+    }
+
+    #[test]
+    fn test_read_os_release() {
+        let mut temp_file = std::env::temp_dir();
+        temp_file.push("test-os-release");
+        
+        let content = "\
+# This is a comment
+PRETTY_NAME=\"Ubuntu 22.04.2 LTS\"
+VERSION_ID=\"22.04\"
+INVALID_LINE
+";
+        fs::write(&temp_file, content).unwrap();
+
+        let info = read_os_release(&temp_file.to_string_lossy());
+        assert_eq!(info.get("PRETTY_NAME").unwrap(), "Ubuntu 22.04.2 LTS");
+        assert_eq!(info.get("VERSION_ID").unwrap(), "22.04");
+        assert_eq!(info.get("INVALID_LINE"), None);
+
+        let _ = fs::remove_file(temp_file);
+    }
+}
+

@@ -206,3 +206,59 @@ impl StressManager {
         self.duration_seconds = 0;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_stress_manager_new() {
+        let mut manager = StressManager::new();
+        assert_eq!(manager.state(), StressState::Idle);
+        assert!(!manager.is_running());
+        assert_eq!(manager.elapsed_seconds(), 0.0);
+        assert_eq!(manager.last_elapsed_seconds(), 0.0);
+        assert_eq!(manager.last_stop_cause(), None);
+    }
+
+    #[test]
+    fn test_stress_manager_lifecycle() {
+        if !StressManager::is_available() {
+            println!("stress-ng is not available, skipping lifecycle test");
+            return;
+        }
+
+        let mut manager = StressManager::new();
+        assert!(manager.start(5)); // start with 5 seconds duration
+        assert_eq!(manager.state(), StressState::Running);
+        assert!(manager.is_running());
+
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        assert!(manager.elapsed_seconds() > 0.0);
+
+        manager.stop("manual_stop");
+        assert_eq!(manager.state(), StressState::Idle);
+        assert!(!manager.is_running());
+        assert_eq!(manager.last_stop_cause(), Some("manual_stop"));
+        assert!(manager.last_elapsed_seconds() > 0.0);
+    }
+
+    #[test]
+    fn test_stress_manager_kill() {
+        if !StressManager::is_available() {
+            println!("stress-ng is not available, skipping kill test");
+            return;
+        }
+
+        let mut manager = StressManager::new();
+        assert!(manager.start(10));
+        assert!(manager.is_running());
+
+        std::thread::sleep(std::time::Duration::from_millis(100));
+
+        manager.kill();
+        assert_eq!(manager.state(), StressState::Idle);
+        assert_eq!(manager.last_stop_cause(), Some("killed"));
+    }
+}
+

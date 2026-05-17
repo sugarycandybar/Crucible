@@ -173,3 +173,71 @@ impl SystemMonitor {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_stat_cpu_valid() {
+        // A typical cpu line: cpu user nice system idle iowait ...
+        let line = "cpu 100 200 300 400 500";
+        let parsed = parse_stat_cpu(line);
+        assert!(parsed.is_some());
+        let (total, idle_total) = parsed.unwrap();
+        // total = 100 + 200 + 300 + 400 + 500 = 1500
+        // idle_total = 400 + 500 = 900
+        assert_eq!(total, 1500);
+        assert_eq!(idle_total, 900);
+    }
+
+    #[test]
+    fn test_parse_stat_cpu_extra_spaces() {
+        let line = "cpu   100   200   300   400   500   600   700";
+        let parsed = parse_stat_cpu(line);
+        assert!(parsed.is_some());
+        let (total, idle_total) = parsed.unwrap();
+        // total = 100 + 200 + 300 + 400 + 500 = 1500
+        // idle_total = 400 + 500 = 900
+        assert_eq!(total, 1500);
+        assert_eq!(idle_total, 900);
+    }
+
+    #[test]
+    fn test_parse_stat_cpu_invalid_prefix() {
+        let line = "cpu0 100 200 300 400 500";
+        let parsed = parse_stat_cpu(line);
+        assert!(parsed.is_none());
+    }
+
+    #[test]
+    fn test_parse_stat_cpu_too_few_fields() {
+        let line = "cpu 100 200 300";
+        let parsed = parse_stat_cpu(line);
+        assert!(parsed.is_none());
+    }
+
+    #[test]
+    fn test_parse_stat_cpu_non_numeric() {
+        let line = "cpu abc def 300 400";
+        let parsed = parse_stat_cpu(line);
+        assert!(parsed.is_none());
+    }
+
+
+    #[test]
+    fn test_system_monitor_history_limiting() {
+        let mut monitor = SystemMonitor::new();
+        assert_eq!(monitor.freq_history.len(), 0);
+        assert_eq!(monitor.temp_history.len(), 0);
+
+        // Poll more than HISTORY_SIZE times
+        for _ in 0..(HISTORY_SIZE + 50) {
+            let _snapshot = monitor.poll();
+        }
+
+        assert_eq!(monitor.freq_history.len(), HISTORY_SIZE);
+        assert_eq!(monitor.temp_history.len(), HISTORY_SIZE);
+    }
+}
+

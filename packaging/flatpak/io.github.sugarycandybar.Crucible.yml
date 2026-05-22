@@ -28,20 +28,11 @@ modules:
           version-query: .tag_name | ltrimstr("V")
           timestamp-query: .published_at
   - name: crucible
-    buildsystem: simple
+    buildsystem: meson
     build-options:
+      prepend-path: /usr/lib/sdk/rust-stable/bin
       env:
         CARGO_HOME: /run/build/crucible/cargo
-    build-commands:
-      - . /usr/lib/sdk/rust-stable/enable.sh && cargo --offline build --release
-      - install -Dm755 target/release/crucible /app/bin/crucible
-      - install -Dm644 data/io.github.sugarycandybar.Crucible.desktop /app/share/applications/io.github.sugarycandybar.Crucible.desktop
-      - install -Dm644 data/io.github.sugarycandybar.Crucible.metainfo.xml /app/share/metainfo/io.github.sugarycandybar.Crucible.metainfo.xml
-      - install -Dm644 data/io.github.sugarycandybar.Crucible.svg /app/share/icons/hicolor/scalable/apps/io.github.sugarycandybar.Crucible.svg
-      - install -Dm644 data/io.github.sugarycandybar.Crucible-symbolic.svg /app/share/icons/hicolor/symbolic/apps/io.github.sugarycandybar.Crucible-symbolic.svg
-      - install -Dm644 data/io.github.sugarycandybar.Hosty.svg /app/share/icons/hicolor/scalable/apps/io.github.sugarycandybar.Hosty.svg
-      - install -Dm644 data/io.github.sugarycandybar.Crucible.Stability.gschema.xml /app/share/glib-2.0/schemas/io.github.sugarycandybar.Crucible.Stability.gschema.xml
-      - glib-compile-schemas /app/share/glib-2.0/schemas/
     sources:
       - type: dir
         path: ../../

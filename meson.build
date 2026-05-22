@@ -3,6 +3,24 @@ project('crucible',
   meson_version: '>= 0.59.0'
 )
 
+cargo = find_program('cargo', required: true)
+
+custom_target('crucible',
+  output: 'crucible',
+  build_always_stale: true,
+  build_by_default: true,
+  command: [
+    'sh', '-c',
+    'cargo build --release --offline --manifest-path "$1" --target-dir "$2/target" && cp "$2/target/release/crucible" "$2/crucible"',
+    '_',
+    meson.current_source_dir() / 'Cargo.toml',
+    meson.current_build_dir(),
+  ],
+  console: true,
+  install: true,
+  install_dir: get_option('bindir'),
+)
+
 gnome = import('gnome')
 
 prefix = get_option('prefix')
@@ -36,7 +54,8 @@ gnome.compile_resources(
   'data/crucible.gresource.xml',
   gresource_bundle: true,
   install: true,
-  install_dir: pkgdatadir
+  install_dir: pkgdatadir,
+  source_dir: 'data',
 )
 
 # Install GSettings schema
@@ -61,6 +80,4 @@ endif
 
 gnome.post_install(
   glib_compile_schemas: true,
-  update_desktop_database: true,
-  update_icon_cache: true,
 )

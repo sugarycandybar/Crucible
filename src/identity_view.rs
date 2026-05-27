@@ -5,7 +5,6 @@ use crate::backend::hardware::SystemSpecs;
 
 pub fn create_identity_view(
     specs: &SystemSpecs,
-    _toast_fn: Box<dyn Fn(String)>,
 ) -> gtk4::ScrolledWindow {
     let scrolled = gtk4::ScrolledWindow::new();
     scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);

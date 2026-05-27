@@ -24,7 +24,6 @@ pub fn create_window(
     window.set_default_height(600);
     window.set_size_request(360, 480);
 
-    let toast_overlay = libadwaita::ToastOverlay::new();
     let toolbar_view = libadwaita::ToolbarView::new();
 
     // Header bar
@@ -51,15 +50,8 @@ pub fn create_window(
     view_stack.set_vexpand(true);
 
     // Identity view (specs)
-    let toast_for_identity = toast_overlay.clone();
-    let show_toast_identity = Box::new(move |msg: String| {
-        let toast = libadwaita::Toast::new(&msg);
-        toast.set_timeout(3);
-        toast_for_identity.add_toast(toast);
-    });
-
     let identity_scrolled =
-        identity_view::create_identity_view(&specs, show_toast_identity);
+        identity_view::create_identity_view(&specs);
     view_stack.add_titled_with_icon(
         &identity_scrolled,
         Some("identity"),
@@ -70,17 +62,7 @@ pub fn create_window(
     // Stability view (stress test)
     let stress = StressManager::new();
     let (stability_scrolled, stability_state) =
-        stability_view::create_stability_view(stress);
-
-    // Set toast callback
-    {
-        let toast_for_stability = toast_overlay.clone();
-        stability_state.borrow_mut().toast_fn = Some(Box::new(move |msg: String| {
-            let toast = libadwaita::Toast::new(&msg);
-            toast.set_timeout(3);
-            toast_for_stability.add_toast(toast);
-        }));
-    }
+        stability_view::create_stability_view(stress, Some(app.clone()));
 
     view_stack.add_titled_with_icon(
         &stability_scrolled,
@@ -94,8 +76,7 @@ pub fn create_window(
     view_switcher.set_stack(Some(&view_stack));
     toolbar_view.set_content(Some(&view_stack));
 
-    toast_overlay.set_child(Some(&toolbar_view));
-    window.set_content(Some(&toast_overlay));
+    window.set_content(Some(&toolbar_view));
 
     // Poll timer (1 Hz)
     let stability_for_timer = stability_state.clone();

@@ -27,10 +27,18 @@ pub struct StabilityState {
     pub duration_row: libadwaita::ComboRow,
     pub temp_limit_row: libadwaita::ComboRow,
     pub stop_at_temp_row: libadwaita::SwitchRow,
-    pub toast_fn: Option<Box<dyn Fn(String)>>,
+    pub app: Option<libadwaita::Application>,
 }
 
 impl StabilityState {
+    fn send_desktop_notification(&self, body: &str) {
+        if let Some(ref app) = self.app {
+            let notification = gio::Notification::new("Crucible");
+            notification.set_body(Some(body));
+            app.send_notification(Some("stress-notification"), &notification);
+        }
+    }
+
     fn overheat_cutoff_c(&self) -> f64 {
         TEMP_LIMITS_C[self.temp_limit_row.selected() as usize] as f64
     }
@@ -75,18 +83,22 @@ impl StabilityState {
 
         let running_now = self.stress.is_running();
         if self.was_running && !running_now {
-            if let Some(ref toast_fn) = self.toast_fn {
-                let elapsed = format_elapsed(self.stress.last_elapsed_seconds());
-                match self.stress.last_stop_cause() {
-                    Some("overheat") => {
-                        toast_fn(format!(
-                            "Test stopped to prevent overheating (Elapsed: {elapsed})"
-                        ));
-                    }
-                    Some("completed") => {
-                        toast_fn(format!("Test completed successfully (Elapsed: {elapsed})"));
-                    }
-                    _ => {}
+            let elapsed = format_elapsed(self.stress.last_elapsed_seconds());
+            match self.stress.last_stop_cause() {
+                Some("overheat") => {
+                    self.send_desktop_notification(&format!(
+                        "Test stopped to prevent overheating (Elapsed: {elapsed})"
+                    ));
+                }
+                Some("completed") => {
+                    self.send_desktop_notification(&format!(
+                        "Test completed successfully (Elapsed: {elapsed})"
+                    ));
+                }
+                _ => {
+                    self.send_desktop_notification(&format!(
+                        "Test stopped (Elapsed: {elapsed})"
+                    ));
                 }
             }
         }
@@ -98,6 +110,7 @@ impl StabilityState {
 
 pub fn create_stability_view(
     stress: StressManager,
+    app: Option<libadwaita::Application>,
 ) -> (gtk4::ScrolledWindow, Rc<RefCell<StabilityState>>) {
     let settings = gio::Settings::new("io.github.sugarycandybar.Crucible.Stability");
 
@@ -209,22 +222,34 @@ pub fn create_stability_view(
         duration_row: duration_row.clone(),
         temp_limit_row: temp_limit_row.clone(),
         stop_at_temp_row: stop_at_temp_row.clone(),
-        toast_fn: None,
+        app,
     }));
 
     duration_row.connect_notify(Some("selected"), move |row, _| {
-        let s = gio::Settings::new("io.github.sugarycandybar.Crucible.Stability");
-        let _ = s.set_uint("duration-index", row.selected());
+        let val = row.selected();
+        glib::idle_add_local(move || {
+            let s = gio::Settings::new("io.github.sugarycandybar.Crucible.Stability");
+            let _ = s.set_uint("duration-index", val);
+            glib::ControlFlow::Break
+        });
     });
 
     temp_limit_row.connect_notify(Some("selected"), move |row, _| {
-        let s = gio::Settings::new("io.github.sugarycandybar.Crucible.Stability");
-        let _ = s.set_uint("temp-limit-index", row.selected());
+        let val = row.selected();
+        glib::idle_add_local(move || {
+            let s = gio::Settings::new("io.github.sugarycandybar.Crucible.Stability");
+            let _ = s.set_uint("temp-limit-index", val);
+            glib::ControlFlow::Break
+        });
     });
 
     stop_at_temp_row.connect_notify(Some("active"), move |row, _| {
-        let s = gio::Settings::new("io.github.sugarycandybar.Crucible.Stability");
-        let _ = s.set_boolean("stop-at-temp", row.is_active());
+        let active = row.is_active();
+        glib::idle_add_local(move || {
+            let s = gio::Settings::new("io.github.sugarycandybar.Crucible.Stability");
+            let _ = s.set_boolean("stop-at-temp", active);
+            glib::ControlFlow::Break
+        });
     });
 
     let sig_state = state.clone();
@@ -232,6 +257,8 @@ pub fn create_stability_view(
         let mut st = sig_state.borrow_mut();
         if st.stress.is_running() {
             st.stress.stop("manual");
+            let elapsed = format_elapsed(st.stress.last_elapsed_seconds());
+            st.send_desktop_notification(&format!("Test stopped manually (Elapsed: {elapsed})"));
             st.was_running = false;
             st.refresh_button_state();
             return;
@@ -241,8 +268,8 @@ pub fn create_stability_view(
         if st.stress.start(duration) {
             st.was_running = true;
             st.refresh_button_state();
-        } else if let Some(ref toast_fn) = st.toast_fn {
-            toast_fn("Could not start stress-ng".to_string());
+        } else {
+            st.send_desktop_notification("Could not start stress-ng");
         }
     });
 

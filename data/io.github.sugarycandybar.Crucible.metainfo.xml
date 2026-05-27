@@ -64,6 +64,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.1.1" date="2026-05-27">
+      <description>
+        <p>Fixed CPU temperature bug</p>
+      </description>
+    </release>
     <release version="1.1.0" date="2026-05-27">
       <description>
         <p>Port to Rust</p>

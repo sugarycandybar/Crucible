@@ -78,7 +78,7 @@ fn read_memory() -> (u64, u64) {
     (used, total)
 }
 
-fn read_cpu_temp() -> Option<f64> {
+fn read_cpu_temp_from_thermal() -> Option<f64> {
     let thermal_base = Path::new("/sys/class/thermal");
     if thermal_base.is_dir() {
         let re = regex::Regex::new(r"^thermal_zone\d+$").unwrap();
@@ -106,6 +106,88 @@ fn read_cpu_temp() -> Option<f64> {
         }
     }
     None
+}
+
+fn read_cpu_temp_from_hwmon() -> Option<f64> {
+    let hwmon_base = Path::new("/sys/class/hwmon");
+    if !hwmon_base.is_dir() {
+        return None;
+    }
+
+    let dir_re = regex::Regex::new(r"^hwmon\d+$").unwrap();
+    let input_re = regex::Regex::new(r"^temp(\d+)_input$").unwrap();
+
+    let mut readings: Vec<(String, f64)> = Vec::new();
+
+    if let Ok(entries) = fs::read_dir(hwmon_base) {
+        for entry in entries.flatten() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            if !dir_re.is_match(&name) {
+                continue;
+            }
+            let name_path = entry.path().join("name");
+            let Ok(driver) = fs::read_to_string(&name_path) else { continue; };
+            if !matches!(driver.trim(), "k10temp" | "coretemp") {
+                continue;
+            }
+            if let Ok(files) = fs::read_dir(entry.path()) {
+                for file in files.flatten() {
+                    let fname = file.file_name().to_string_lossy().to_string();
+                    if let Some(caps) = input_re.captures(&fname) {
+                        let index = caps[1].to_string();
+                        let input_path = file.path();
+                        let Ok(content) = fs::read_to_string(&input_path) else { continue; };
+                        let Ok(millic) = content.trim().parse::<f64>() else { continue; };
+                        let c = millic / 1000.0;
+                        if !(c > 0.0 && c < 200.0) {
+                            continue;
+                        }
+                        let label_path = entry.path().join(format!("temp{}_label", index));
+                        let label = fs::read_to_string(&label_path)
+                            .ok()
+                            .map(|s| s.trim().to_string())
+                            .unwrap_or_default();
+                        readings.push((label, c));
+                    }
+                }
+            }
+        }
+    }
+
+    if readings.is_empty() {
+        return None;
+    }
+
+    for (label, temp) in &readings {
+        if label == "Tdie" || label == "Package id 0" {
+            return Some((*temp * 10.0).round() / 10.0);
+        }
+    }
+
+    for (label, temp) in &readings {
+        if label == "Tctl" {
+            return Some((*temp * 10.0).round() / 10.0);
+        }
+    }
+
+    let ccd_readings: Vec<f64> = readings.iter()
+        .filter(|(label, _)| label.starts_with("Tccd"))
+        .map(|(_, temp)| *temp)
+        .collect();
+    if !ccd_readings.is_empty() {
+        let avg = ccd_readings.iter().sum::<f64>() / ccd_readings.len() as f64;
+        return Some((avg * 10.0).round() / 10.0);
+    }
+
+    if let Some((_, temp)) = readings.iter().find(|(label, _)| !label.is_empty()) {
+        return Some((*temp * 10.0).round() / 10.0);
+    }
+
+    readings.first().map(|(_, temp)| (*temp * 10.0).round() / 10.0)
+}
+
+fn read_cpu_temp() -> Option<f64> {
+    read_cpu_temp_from_thermal().or_else(read_cpu_temp_from_hwmon)
 }
 
 fn read_cpu_freq() -> f64 {

@@ -37,11 +37,39 @@ pub fn create_window(
     // Menu button
     let menu_button = gtk4::MenuButton::new();
     menu_button.set_icon_name("open-menu-symbolic");
+    menu_button.set_tooltip_text(Some("Main Menu"));
     let menu = gio::Menu::new();
+    menu.append(Some("Keyboard Shortcuts"), Some("win.show-shortcuts"));
     menu.append(Some("About Crucible"), Some("app.about"));
-    menu.append(Some("Quit"), Some("app.quit"));
     menu_button.set_menu_model(Some(&menu));
     header.pack_end(&menu_button);
+
+    let menu_action = gio::SimpleAction::new("menu", None);
+    {
+        let menu_button = menu_button.clone();
+        menu_action.connect_activate(move |_, _| {
+            menu_button.popup();
+        });
+    }
+    window.add_action(&menu_action);
+
+    let show_shortcuts_action = gio::SimpleAction::new("show-shortcuts", None);
+    {
+        let window = window.clone();
+        show_shortcuts_action.connect_activate(move |_, _| {
+            let shortcuts = libadwaita::ShortcutsDialog::builder()
+                .title("Keyboard Shortcuts")
+                .build();
+
+            let section = libadwaita::ShortcutsSection::new(Some("General"));
+            section.add(libadwaita::ShortcutsItem::from_action("Open Menu", "win.menu"));
+            section.add(libadwaita::ShortcutsItem::from_action("Keyboard Shortcuts", "win.show-shortcuts"));
+            section.add(libadwaita::ShortcutsItem::from_action("Close Window", "app.quit"));
+            shortcuts.add(section);
+            shortcuts.present(Some(&window));
+        });
+    }
+    window.add_action(&show_shortcuts_action);
 
     toolbar_view.add_top_bar(&header);
 

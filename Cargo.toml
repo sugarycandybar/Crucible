@@ -7,11 +7,10 @@ license = "GPL-3.0-or-later"
 description = "View hardware specs and stress test your system"
 
 [dependencies]
-gtk4 = { version = "0.9", features = ["v4_16"] }
-libadwaita = { version = "0.7", features = ["v1_7"] }
-gio = "0.20"
-glib = "0.20"
-cairo-rs = "0.20"
+gtk4 = { version = "0.11.3", features = ["v4_22"] }
+libadwaita = { version = "0.9.1", features = ["v1_9", "gtk_v4_22", "gio_v2_80"] }
+gio = "0.22"
+glib = "0.22"
 
 regex = "1"
 libc = "0.2"

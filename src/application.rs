@@ -132,7 +132,9 @@ pub fn run_app() {
             }
         });
         app.add_action(&quit_action);
-        app.set_accels_for_action("app.quit", &["<Primary>q"]);
+        app.set_accels_for_action("app.quit", &["<Primary>q", "<Primary>w"]);
+        app.set_accels_for_action("win.show-shortcuts", &["<Control>question"]);
+        app.set_accels_for_action("win.menu", &["F10"]);
     });
 
     let monitor_clone = Rc::clone(&monitor);

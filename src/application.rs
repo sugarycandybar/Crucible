@@ -114,6 +114,11 @@ pub fn run_app() {
                     "Hosty",
                     "Host Minecraft servers",
                 );
+                dialog.add_other_app(
+                    "io.github.sugarycandybar.Carabiner",
+                    "Carabiner",
+                    "Create and manage network tunnels",
+                );
                 dialog.present(window.as_ref());
             }
         });

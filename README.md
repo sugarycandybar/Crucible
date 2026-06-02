@@ -1,10 +1,17 @@
-# Crucible
+<p align="center">
+  <img src="data/io.github.sugarycandybar.Crucible.svg" alt="Crucible icon" width="128" />
+</p>
 
-Crucible is a desktop app for viewing system hardware specs and running stress tests with a clean, native-style UI.
+<h1 align="center">Crucible</h1>
 
-It keeps hardware monitoring and testing simple: view detailed system information, benchmark your hardware, and monitor temperatures and performance in real time, all in one place.
+<p align="center">
+  View specs and stress test hardware
+  <br><br>
+  <a href="https://flathub.org/en/apps/io.github.sugarycandybar.Crucible"><img src="https://img.shields.io/flathub/downloads/io.github.sugarycandybar.Crucible?label=Flathub%20Downloads&color=brightgreen"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/sugarycandybar/Crucible?label=License&color=blue"></a>
+</p>
 
-## Why Crucible?
+## Features
 
 - Easy to use: view your hardware specs and run stress tests without complex tools or configuration.
 - Real-time monitoring: watch CPU temperature and usage live during stress tests.

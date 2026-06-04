@@ -21,7 +21,7 @@
 
 ## Run Crucible
 
-[![Download on Flathub](https://flathub.org/assets/badges/flathub-badge-en.png)](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible)
+[![Download on Flathub](https://flathub.org/api/badge?svg&locale=en)](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible)
 
 <details>
 <summary>Build from source (Rust)</summary>

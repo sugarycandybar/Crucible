@@ -7,6 +7,10 @@
     <file preprocess="xml-stripblanks" alias="scalable/actions/arrow-pointing-at-line-up-symbolic.svg">icons/arrow-pointing-at-line-up-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="scalable/actions/stop-sign-large-symbolic.svg">icons/stop-sign-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="scalable/actions/thermometer-symbolic.svg">icons/thermometer-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/drive-harddisk-symbolic.svg">icons/drive-harddisk-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/application-x-firmware-symbolic.svg">icons/application-x-firmware-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/alarm-symbolic.svg">icons/alarm-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/computer-symbolic.svg">icons/computer-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="scalable/apps/io.github.sugarycandybar.Hosty.svg">icons/io.github.sugarycandybar.Hosty.svg</file>
     <file preprocess="xml-stripblanks" alias="scalable/apps/io.github.sugarycandybar.Carabiner.svg">icons/io.github.sugarycandybar.Carabiner.svg</file>
   </gresource>

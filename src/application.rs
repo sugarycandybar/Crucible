@@ -78,15 +78,10 @@ pub fn run_app() {
             );
         }
 
-        // Register embedded GResource icons
         let resource_data = include_bytes!(concat!(env!("OUT_DIR"), "/crucible.gresource"));
         let bytes = glib::Bytes::from_static(resource_data);
         if let Ok(resource) = gio::Resource::from_data(&bytes) {
             gio::resources_register(&resource);
-            if let Some(display) = gtk4::gdk::Display::default() {
-                let icon_theme = gtk4::IconTheme::for_display(&display);
-                icon_theme.add_resource_path("/io/github/sugarycandybar/Crucible/icons");
-            }
         }
 
         // Setup actions
@@ -141,6 +136,11 @@ pub fn run_app() {
     let holder_clone = Rc::clone(&stability_state_holder);
 
     app.connect_activate(move |app| {
+        if let Some(display) = gtk4::gdk::Display::default() {
+            let icon_theme = gtk4::IconTheme::for_display(&display);
+            icon_theme.add_resource_path("/io/github/sugarycandybar/Crucible/icons");
+        }
+
         if !app.windows().is_empty() {
             app.windows().first().unwrap().present();
             return;

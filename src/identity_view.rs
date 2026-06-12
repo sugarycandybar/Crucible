@@ -160,7 +160,9 @@ fn make_row_with_subtitle(
         icon_name.to_string()
     };
 
-    row.add_prefix(&gtk4::Image::from_icon_name(&resolved));
+    let image = gtk4::Image::from_icon_name(&resolved);
+    image.set_pixel_size(16);
+    row.add_prefix(&image);
 
     let label = gtk4::Label::new(Some(value));
     label.add_css_class("dim-label");

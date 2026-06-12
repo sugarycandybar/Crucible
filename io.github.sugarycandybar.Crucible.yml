@@ -1,4 +1,4 @@
-app-id: io.github.sugarycandybar.Crucible
+id: io.github.sugarycandybar.Crucible
 runtime: org.gnome.Platform
 runtime-version: "50"
 sdk: org.gnome.Sdk
@@ -11,6 +11,14 @@ finish-args:
   - --socket=fallback-x11
   - --device=dri
   - --filesystem=/sys:ro
+
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin
+  build-args:
+    - --share=network
+  env:
+    CARGO_HOME: /run/build/crucible/cargo
+
 modules:
   - name: stress-ng
     buildsystem: simple
@@ -27,13 +35,12 @@ modules:
           tag-query: .tag_name
           version-query: .tag_name | ltrimstr("V")
           timestamp-query: .published_at
+
   - name: crucible
     buildsystem: meson
-    build-options:
-      prepend-path: /usr/lib/sdk/rust-stable/bin
-      env:
-        CARGO_HOME: /run/build/crucible/cargo
+    builddir: true
+    config-opts:
+      - --buildtype=debug
     sources:
       - type: dir
-        path: ../../
-      - generated-sources.json
+        path: .

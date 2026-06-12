@@ -43,7 +43,9 @@ impl StressManager {
                             .unwrap_or(0.0);
                         self.last_elapsed_seconds = elapsed.max(0.0);
 
-                        if self.duration_seconds > 0 && elapsed >= self.duration_seconds.saturating_sub(1) as f64 {
+                        if self.duration_seconds > 0
+                            && elapsed >= self.duration_seconds.saturating_sub(1) as f64
+                        {
                             self.last_stop_cause = Some("completed".to_string());
                         } else {
                             self.last_stop_cause = Some("exited".to_string());
@@ -261,4 +263,3 @@ mod tests {
         assert_eq!(manager.last_stop_cause(), Some("killed"));
     }
 }
-

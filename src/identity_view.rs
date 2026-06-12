@@ -3,9 +3,7 @@ use libadwaita::prelude::*;
 
 use crate::backend::hardware::SystemSpecs;
 
-pub fn create_identity_view(
-    specs: &SystemSpecs,
-) -> gtk4::ScrolledWindow {
+pub fn create_identity_view(specs: &SystemSpecs) -> gtk4::ScrolledWindow {
     let scrolled = gtk4::ScrolledWindow::new();
     scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
 
@@ -21,21 +19,28 @@ pub fn create_identity_view(
     // System group
     let sys_group = libadwaita::PreferencesGroup::new();
     sys_group.set_title("System");
-    sys_group.add(&make_row("Operating System", &specs.os_name, "drive-harddisk-symbolic"));
-    sys_group.add(&make_row("Kernel", &specs.kernel, "application-x-firmware-symbolic"));
+    sys_group.add(&make_row(
+        "Operating System",
+        &specs.os_name,
+        "drive-harddisk-symbolic",
+    ));
+    sys_group.add(&make_row(
+        "Kernel",
+        &specs.kernel,
+        "application-x-firmware-symbolic",
+    ));
     content.append(&sys_group);
 
     // Processor group
     let cpu_group = libadwaita::PreferencesGroup::new();
     cpu_group.set_title("Processor");
-    cpu_group.add(&make_row(
-        "Model",
-        &specs.cpu_model,
-        "processor-symbolic",
-    ));
+    cpu_group.add(&make_row("Model", &specs.cpu_model, "processor-symbolic"));
     cpu_group.add(&make_row(
         "Cores",
-        &format!("{} cores, {} threads", specs.cpu_cores_physical, specs.cpu_cores_logical),
+        &format!(
+            "{} cores, {} threads",
+            specs.cpu_cores_physical, specs.cpu_cores_logical
+        ),
         "view-grid-symbolic",
     ));
     if specs.cpu_freq_max_ghz() > 0.0 {

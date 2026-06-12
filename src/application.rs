@@ -55,15 +55,12 @@ fn ensure_schema() {
 
 pub fn run_app() {
     ensure_schema();
-    let app = libadwaita::Application::new(
-        Some(config::APP_ID),
-        gio::ApplicationFlags::default(),
-    );
+    let app = libadwaita::Application::new(Some(config::APP_ID), gio::ApplicationFlags::default());
     app.set_resource_base_path(Some("/io/github/sugarycandybar/Crucible"));
 
     let monitor = Rc::new(RefCell::new(SystemMonitor::new()));
-    let stability_state_holder: Rc<RefCell<Option<Rc<RefCell<stability_view::StabilityState>>>>>
-        = Rc::new(RefCell::new(None));
+    let stability_state_holder: Rc<RefCell<Option<Rc<RefCell<stability_view::StabilityState>>>>> =
+        Rc::new(RefCell::new(None));
 
     app.connect_startup(|app| {
         // Load CSS

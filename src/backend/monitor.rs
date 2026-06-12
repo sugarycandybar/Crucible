@@ -126,7 +126,9 @@ fn read_cpu_temp_from_hwmon() -> Option<f64> {
                 continue;
             }
             let name_path = entry.path().join("name");
-            let Ok(driver) = fs::read_to_string(&name_path) else { continue; };
+            let Ok(driver) = fs::read_to_string(&name_path) else {
+                continue;
+            };
             if !matches!(driver.trim(), "k10temp" | "coretemp") {
                 continue;
             }
@@ -136,8 +138,12 @@ fn read_cpu_temp_from_hwmon() -> Option<f64> {
                     if let Some(caps) = input_re.captures(&fname) {
                         let index = caps[1].to_string();
                         let input_path = file.path();
-                        let Ok(content) = fs::read_to_string(&input_path) else { continue; };
-                        let Ok(millic) = content.trim().parse::<f64>() else { continue; };
+                        let Ok(content) = fs::read_to_string(&input_path) else {
+                            continue;
+                        };
+                        let Ok(millic) = content.trim().parse::<f64>() else {
+                            continue;
+                        };
                         let c = millic / 1000.0;
                         if !(c > 0.0 && c < 200.0) {
                             continue;
@@ -170,7 +176,8 @@ fn read_cpu_temp_from_hwmon() -> Option<f64> {
         }
     }
 
-    let ccd_readings: Vec<f64> = readings.iter()
+    let ccd_readings: Vec<f64> = readings
+        .iter()
         .filter(|(label, _)| label.starts_with("Tccd"))
         .map(|(_, temp)| *temp)
         .collect();
@@ -183,7 +190,9 @@ fn read_cpu_temp_from_hwmon() -> Option<f64> {
         return Some((*temp * 10.0).round() / 10.0);
     }
 
-    readings.first().map(|(_, temp)| (*temp * 10.0).round() / 10.0)
+    readings
+        .first()
+        .map(|(_, temp)| (*temp * 10.0).round() / 10.0)
 }
 
 fn read_cpu_temp() -> Option<f64> {
@@ -196,7 +205,8 @@ fn read_cpu_freq() -> f64 {
         if let Ok(entries) = fs::read_dir(cpu_base) {
             for entry in entries.flatten() {
                 let fname = entry.file_name().to_string_lossy().to_string();
-                if fname.starts_with("cpu") && fname.len() > 3
+                if fname.starts_with("cpu")
+                    && fname.len() > 3
                     && fname[3..].chars().all(|c| c.is_ascii_digit())
                 {
                     let freq_path = entry.path().join("cpufreq").join("scaling_cur_freq");
@@ -306,7 +316,6 @@ mod tests {
         assert!(parsed.is_none());
     }
 
-
     #[test]
     fn test_system_monitor_history_limiting() {
         let mut monitor = SystemMonitor::new();
@@ -322,4 +331,3 @@ mod tests {
         assert_eq!(monitor.temp_history.len(), HISTORY_SIZE);
     }
 }
-

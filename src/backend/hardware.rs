@@ -40,8 +40,7 @@ impl SystemSpecs {
     pub fn to_plain_text(&self) -> String {
         let mut lines = vec!["System Specs".to_string(), String::new()];
 
-        let os_display = if !self.os_version.is_empty()
-            && !self.os_name.contains(&self.os_version)
+        let os_display = if !self.os_version.is_empty() && !self.os_name.contains(&self.os_version)
         {
             format!("{} {}", self.os_name, self.os_version)
         } else {
@@ -61,7 +60,11 @@ impl SystemSpecs {
             lines.push("GPU: Unknown".to_string());
         } else {
             for (i, gpu) in self.gpus.iter().enumerate() {
-                let tag = if gpu.is_integrated { " (integrated)" } else { "" };
+                let tag = if gpu.is_integrated {
+                    " (integrated)"
+                } else {
+                    ""
+                };
                 lines.push(format!("GPU {i}: {}{tag}", gpu.name));
             }
         }
@@ -80,7 +83,10 @@ fn read_os_release(path: &str) -> HashMap<String, String> {
                 continue;
             }
             if let Some((k, v)) = line.split_once('=') {
-                info.insert(k.to_string(), v.trim_matches('"').trim_matches('\'').to_string());
+                info.insert(
+                    k.to_string(),
+                    v.trim_matches('"').trim_matches('\'').to_string(),
+                );
             }
         }
     }
@@ -91,13 +97,17 @@ fn get_os_info() -> (String, String) {
     let (name, ver) = if Path::new("/run/host/os-release").exists() {
         let info = read_os_release("/run/host/os-release");
         (
-            info.get("PRETTY_NAME").cloned().unwrap_or_else(|| "Linux".to_string()),
+            info.get("PRETTY_NAME")
+                .cloned()
+                .unwrap_or_else(|| "Linux".to_string()),
             info.get("VERSION_ID").unwrap_or(&String::new()).clone(),
         )
     } else if Path::new("/etc/os-release").exists() {
         let info = read_os_release("/etc/os-release");
         (
-            info.get("PRETTY_NAME").cloned().unwrap_or_else(|| "Linux".to_string()),
+            info.get("PRETTY_NAME")
+                .cloned()
+                .unwrap_or_else(|| "Linux".to_string()),
             info.get("VERSION_ID").unwrap_or(&String::new()).clone(),
         )
     } else {
@@ -163,7 +173,8 @@ fn get_cpu_freq_max() -> f64 {
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries.flatten() {
             let fname = entry.file_name().to_string_lossy().to_string();
-            if fname.starts_with("cpu") && fname.len() > 3
+            if fname.starts_with("cpu")
+                && fname.len() > 3
                 && fname[3..].chars().all(|c| c.is_ascii_digit())
             {
                 let freq_path = entry.path().join("cpufreq").join("cpuinfo_max_freq");
@@ -210,10 +221,10 @@ fn pci_id_to_name(vendor_id: &str, device_id: &str) -> Option<String> {
     if let Ok(output) = Command::new("lspci").args(["-d", &addr]).output() {
         if output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
+            let re = regex::Regex::new(r"\s*\(rev\s+[0-9a-fA-F]+\)\s*$").unwrap();
             for line in stdout.lines() {
                 if let Some((_, rest)) = line.split_once(": ") {
                     let name = rest.trim().to_string();
-                    let re = regex::Regex::new(r"\s*\(rev\s+[0-9a-fA-F]+\)\s*$").unwrap();
                     let name = re.replace(&name, "").to_string();
                     return Some(name);
                 }
@@ -223,11 +234,8 @@ fn pci_id_to_name(vendor_id: &str, device_id: &str) -> Option<String> {
     None
 }
 
-const KNOWN_GPU_VENDORS: &[(&str, &str)] = &[
-    ("0x10de", "NVIDIA"),
-    ("0x1002", "AMD"),
-    ("0x8086", "Intel"),
-];
+const KNOWN_GPU_VENDORS: &[(&str, &str)] =
+    &[("0x10de", "NVIDIA"), ("0x1002", "AMD"), ("0x8086", "Intel")];
 
 fn detect_gpus() -> Vec<GpuInfo> {
     let mut gpus: Vec<GpuInfo> = Vec::new();
@@ -251,10 +259,12 @@ fn detect_gpus() -> Vec<GpuInfo> {
                     continue;
                 }
 
-                let vendor_id = fs::read_to_string(&vendor_path).ok()
+                let vendor_id = fs::read_to_string(&vendor_path)
+                    .ok()
                     .map(|s| s.trim().to_string());
                 let device_id = if device_path.is_file() {
-                    fs::read_to_string(&device_path).ok()
+                    fs::read_to_string(&device_path)
+                        .ok()
                         .map(|s| s.trim().to_string())
                 } else {
                     None
@@ -429,7 +439,7 @@ mod tests {
     fn test_read_os_release() {
         let mut temp_file = std::env::temp_dir();
         temp_file.push("test-os-release");
-        
+
         let content = "\
 # This is a comment
 PRETTY_NAME=\"Ubuntu 22.04.2 LTS\"
@@ -446,4 +456,3 @@ INVALID_LINE
         let _ = fs::remove_file(temp_file);
     }
 }
-

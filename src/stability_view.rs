@@ -96,9 +96,7 @@ impl StabilityState {
                     ));
                 }
                 _ => {
-                    self.send_desktop_notification(&format!(
-                        "Test stopped (Elapsed: {elapsed})"
-                    ));
+                    self.send_desktop_notification(&format!("Test stopped (Elapsed: {elapsed})"));
                 }
             }
         }

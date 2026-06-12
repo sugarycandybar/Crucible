@@ -62,9 +62,18 @@ pub fn create_window(
                 .build();
 
             let section = libadwaita::ShortcutsSection::new(Some("General"));
-            section.add(libadwaita::ShortcutsItem::from_action("Open Menu", "win.menu"));
-            section.add(libadwaita::ShortcutsItem::from_action("Keyboard Shortcuts", "win.show-shortcuts"));
-            section.add(libadwaita::ShortcutsItem::from_action("Close Window", "app.quit"));
+            section.add(libadwaita::ShortcutsItem::from_action(
+                "Open Menu",
+                "win.menu",
+            ));
+            section.add(libadwaita::ShortcutsItem::from_action(
+                "Keyboard Shortcuts",
+                "win.show-shortcuts",
+            ));
+            section.add(libadwaita::ShortcutsItem::from_action(
+                "Close Window",
+                "app.quit",
+            ));
             shortcuts.add(section);
             shortcuts.present(Some(&window));
         });
@@ -78,8 +87,7 @@ pub fn create_window(
     view_stack.set_vexpand(true);
 
     // Identity view (specs)
-    let identity_scrolled =
-        identity_view::create_identity_view(&specs);
+    let identity_scrolled = identity_view::create_identity_view(&specs);
     view_stack.add_titled_with_icon(
         &identity_scrolled,
         Some("identity"),

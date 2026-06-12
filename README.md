@@ -23,36 +23,9 @@
 
 [![Download on Flathub](https://flathub.org/api/badge?svg&locale=en)](https://flathub.org/en/apps/io.github.sugarycandybar.Crucible)
 
-<details>
-<summary>Build from source (Rust)</summary>
+## Development
 
-### Prerequisites
-
-Install Rust via [rustup](https://rustup.rs/) or your package manager, and install the build dependencies:
-
-```bash
-# Fedora
-sudo dnf install gtk4-devel libadwaita-devel stress-ng
-
-# Ubuntu/Debian
-sudo apt install libgtk-4-dev libadwaita-1-dev stress-ng
-```
-
-### Build & Run
-
-```bash
-cargo build --release
-./target/release/crucible
-```
-
-### Building the Flatpak
-
-```bash
-flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.sugarycandybar.Crucible.yml
-flatpak run io.github.sugarycandybar.Crucible
-```
-
-</details>
+You can clone this project and run it using [GNOME Builder](https://apps.gnome.org/Builder/).
 
 ## Screenshots
 

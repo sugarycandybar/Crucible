@@ -369,12 +369,8 @@ impl StabilityState {
                 Some("overheat") => {
                     // Determine which device overheated from the snapshot that triggered the stop
                     let cutoff = self.overheat_cutoff_c();
-                    let cpu_hot = cutoff
-                        .zip(snapshot.cpu_temp_c)
-                        .is_some_and(|(c, t)| t >= c);
-                    let gpu_hot = cutoff
-                        .zip(snapshot.gpu_temp_c)
-                        .is_some_and(|(c, t)| t >= c);
+                    let cpu_hot = cutoff.zip(snapshot.cpu_temp_c).is_some_and(|(c, t)| t >= c);
+                    let gpu_hot = cutoff.zip(snapshot.gpu_temp_c).is_some_and(|(c, t)| t >= c);
                     let device = match (cpu_hot, gpu_hot) {
                         (true, true) => "CPU/GPU",
                         (true, false) => "CPU",

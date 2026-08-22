@@ -36,7 +36,7 @@ You can clone this project and run it using [GNOME Builder](https://apps.gnome.o
 - **Stress Test**: run stress tests and monitor temperature and usage in real time.
 
 <p align="center">
-	<img src="data/screenshots/whole_specs.png" alt="Full specs view" width="450" />
+	<img src="data/screenshots/specs_top.png" alt="Specs view" width="450" />
 </p>
 
 - **Specs**: complete hardware overview with CPU, GPU, memory, and OS details.

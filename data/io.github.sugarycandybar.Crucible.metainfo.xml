@@ -47,15 +47,15 @@
   <url type="vcs-browser">https://github.com/sugarycandybar/Crucible</url>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/21a8aba5bcaf256123da30ab17b2ea721e349e2c/packaging/linux/screenshots/stress_test.png</image>
+      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/51eaeb7e493e9a911b3f8722dff7faff4deee5d5/packaging/linux/screenshots/stress_test.png</image>
       <caption>Stress test dashboard with live monitoring</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/21a8aba5bcaf256123da30ab17b2ea721e349e2c/packaging/linux/screenshots/specs_top.png</image>
+      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/51eaeb7e493e9a911b3f8722dff7faff4deee5d5/packaging/linux/screenshots/specs_top.png</image>
       <caption>CPU and system information</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/21a8aba5bcaf256123da30ab17b2ea721e349e2c/packaging/linux/screenshots/specs_bottom.png</image>
+      <image>https://raw.githubusercontent.com/sugarycandybar/Crucible/51eaeb7e493e9a911b3f8722dff7faff4deee5d5/packaging/linux/screenshots/specs_bottom.png</image>
       <caption>Memory and GPU details</caption>
     </screenshot>
   </screenshots>

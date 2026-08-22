@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <schemalist gettext-domain="crucible">
   <schema id="io.github.sugarycandybar.Crucible.Stability" path="/io/github/sugarycandybar/Crucible/Stability/">
+    <key name="stress-type-index" type="u">
+      <default>0</default>
+      <summary>Selected stress type (0=CPU, 1=GPU, 2=Both)</summary>
+    </key>
     <key name="duration-index" type="u">
       <default>0</default>
       <summary>Selected duration preset</summary>

@@ -4,6 +4,7 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 use libadwaita::prelude::*;
 
+use crate::backend::gpu_stress::GpuStressManager;
 use crate::backend::hardware::SystemSpecs;
 use crate::backend::monitor::SystemMonitor;
 use crate::backend::stress::StressManager;
@@ -20,9 +21,9 @@ pub fn create_window(
 ) {
     let window = libadwaita::ApplicationWindow::new(app);
     window.set_title(Some("Crucible"));
-    window.set_default_width(520);
-    window.set_default_height(600);
-    window.set_size_request(360, 480);
+    window.set_default_width(550);
+    window.set_default_height(550);
+    window.set_size_request(400, 510);
 
     let toolbar_view = libadwaita::ToolbarView::new();
 
@@ -97,8 +98,9 @@ pub fn create_window(
 
     // Stability view (stress test)
     let stress = StressManager::new();
+    let gpu_stress = GpuStressManager::new();
     let (stability_scrolled, stability_state) =
-        stability_view::create_stability_view(stress, Some(app.clone()));
+        stability_view::create_stability_view(stress, gpu_stress, Some(app.clone()));
 
     view_stack.add_titled_with_icon(
         &stability_scrolled,
@@ -114,6 +116,12 @@ pub fn create_window(
 
     window.set_content(Some(&toolbar_view));
 
+    // Initial poll to prime cache for instant layout switches
+    {
+        let snapshot = monitor.borrow_mut().poll();
+        stability_state.borrow_mut().update(&snapshot);
+    }
+
     // Poll timer (1 Hz)
     let stability_for_timer = stability_state.clone();
     let monitor_for_timer = monitor.clone();
@@ -126,10 +134,11 @@ pub fn create_window(
         glib::ControlFlow::Continue
     });
 
-    // Kill stress-ng on window close
+    // Kill stress tests on window close
     let stability_for_close = stability_state.clone();
     window.connect_close_request(move |_| {
         stability_for_close.borrow_mut().stress.kill();
+        stability_for_close.borrow_mut().gpu_stress.kill();
         glib::Propagation::Proceed
     });
 

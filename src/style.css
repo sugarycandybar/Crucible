@@ -1,20 +1,37 @@
-/* Crucible — Minimal Adwaita CSS overrides
+/* Crucible - Minimal Adwaita CSS overrides
  *
- * Keeps things light — Adwaita handles the heavy lifting.
+ * Keeps things light - Adwaita handles the heavy lifting.
  * We only override things that are genuinely custom.
  */
 
 /* ===== Temperature gauge ===== */
+/* GTK4 LevelBar offset styling is fragile (block.filled.<name>), so we
+ * also drive color via explicit widget classes set from Rust. */
+levelbar.temp-gauge block.filled.low,
 levelbar.temp-gauge block.low {
     background-color: @success_color;
 }
 
+levelbar.temp-gauge block.filled.high,
 levelbar.temp-gauge block.high {
-    background-color: @warning_color;
+    background-color: @warning_bg_color;
 }
 
+levelbar.temp-gauge block.filled.full,
 levelbar.temp-gauge block.full {
-    background-color: @destructive_color;
+    background-color: @error_color;
+}
+
+/* Explicit temp-* classes override offset styling - guarantees red at high temps
+ * Only target block.filled so the empty trough stays empty */
+levelbar.temp-gauge.temp-low block.filled {
+    background-color: @success_color;
+}
+levelbar.temp-gauge.temp-high block.filled {
+    background-color: @warning_bg_color;
+}
+levelbar.temp-gauge.temp-full block.filled {
+    background-color: @error_color;
 }
 
 levelbar.temp-gauge trough {
@@ -30,4 +47,6 @@ button.button-row {
     padding-left: 18px;
     padding-right: 18px;
 }
+
+
 

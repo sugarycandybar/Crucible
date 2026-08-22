@@ -1,3 +1,7 @@
+use std::fs;
+use std::path::Path;
+use std::process::Command;
+
 use gtk4::prelude::*;
 use libadwaita::prelude::*;
 
@@ -80,6 +84,14 @@ pub fn create_identity_view(specs: &SystemSpecs) -> gtk4::ScrolledWindow {
             ));
         }
     }
+    // VRAM row under graphics (always, even if GPU unknown)
+    let vram_bytes = get_vram_total_bytes();
+    let vram_label = if vram_bytes > 0 {
+        format!("{:.1} GB", vram_bytes as f64 / 1_000_000_000.0)
+    } else {
+        "Unknown".to_string()
+    };
+    gpu_group.add(&make_row("VRAM", &vram_label, "memory-symbolic"));
     content.append(&gpu_group);
 
     // Memory group
@@ -135,6 +147,53 @@ pub fn create_identity_view(specs: &SystemSpecs) -> gtk4::ScrolledWindow {
     scrolled.set_child(Some(&clamp));
 
     scrolled
+}
+
+fn get_vram_total_bytes() -> u64 {
+    let mut total: u64 = 0;
+    let drm_base = Path::new("/sys/class/drm");
+    if drm_base.is_dir() {
+        if let Ok(entries) = fs::read_dir(drm_base) {
+            for entry in entries.flatten() {
+                let name = entry.file_name().to_string_lossy().to_string();
+                if !name.starts_with("card") {
+                    continue;
+                }
+                let suffix = &name[4..];
+                if suffix.is_empty() || !suffix.chars().all(|c| c.is_ascii_digit()) {
+                    continue;
+                }
+                let total_path = entry.path().join("device").join("mem_info_vram_total");
+                if let Ok(content) = fs::read_to_string(&total_path) {
+                    if let Ok(v) = content.trim().parse::<u64>() {
+                        total += v;
+                    }
+                }
+            }
+        }
+    }
+    if total > 0 {
+        return total;
+    }
+    // Fallback to nvidia-smi
+    if let Ok(output) = Command::new("nvidia-smi")
+        .args(["--query-gpu=memory.total", "--format=csv,noheader,nounits"])
+        .output()
+    {
+        if output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let mut nvidia_total: u64 = 0;
+            for line in stdout.lines() {
+                if let Ok(mb) = line.trim().parse::<u64>() {
+                    nvidia_total += mb * 1024 * 1024;
+                }
+            }
+            if nvidia_total > 0 {
+                return nvidia_total;
+            }
+        }
+    }
+    0
 }
 
 fn make_row(title: &str, value: &str, icon_name: &str) -> libadwaita::ActionRow {

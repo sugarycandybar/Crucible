@@ -97,6 +97,8 @@ pub fn run_app() {
                     .license_type(gtk4::License::Gpl30)
                     .comments("View hardware specs and stress test your system.")
                     .build();
+                dialog.add_credit_section(Some("Code by"), &["Sugarycandybar"]);
+                dialog.add_credit_section(Some("Artwork by"), &["gnoman"]);
                 dialog.add_acknowledgement_section(
                     Some("Acknowledgements"),
                     &["stress-ng https://github.com/ColinIanKing/stress-ng"],

@@ -63,7 +63,6 @@ pub fn create_temp_widgets(compact: bool) -> TempWidgets {
     }
 }
 
-#[allow(dead_code)]
 pub fn set_temp_widgets(widgets: &TempWidgets, temp_c: Option<f64>) {
     set_temp_widgets_with_prefix(widgets, temp_c, None)
 }

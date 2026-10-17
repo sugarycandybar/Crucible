@@ -8,7 +8,7 @@ use crate::backend::gpu_stress::GpuStressManager;
 use crate::backend::monitor::MonitorSnapshot;
 use crate::backend::stress::StressManager;
 use crate::ui::widgets::temp_gauge::{
-    create_temp_widgets, pick_temperature_icon, set_temp_widgets_with_prefix, TempWidgets,
+    create_temp_widgets, pick_temperature_icon, set_temp_widgets, TempWidgets,
 };
 
 const DURATIONS: &[(u64, &str)] = &[
@@ -57,13 +57,18 @@ pub struct StabilityState {
 
     // Unified sensors group - no animations, instant switch
     pub sensors_group: libadwaita::PreferencesGroup,
+    // Wide layout: a single "Temperature" row holding both gauges side by side.
     pub temp_row: libadwaita::ActionRow,
-    pub cpu_temp_widgets: TempWidgets,
-    pub gpu_temp_widgets: TempWidgets,
-    pub cpu_temp_column: gtk4::Box,
-    pub gpu_temp_column: gtk4::Box,
-    #[allow(dead_code)]
-    pub temp_suffix: gtk4::Box,
+    pub cpu_wide_column: gtk4::Box,
+    pub gpu_wide_column: gtk4::Box,
+    pub cpu_wide_widgets: TempWidgets,
+    pub gpu_wide_widgets: TempWidgets,
+    // Narrow layout: one row per chip so nothing gets cramped.
+    pub cpu_temp_row: libadwaita::ActionRow,
+    pub gpu_temp_row: libadwaita::ActionRow,
+    pub cpu_narrow_widgets: TempWidgets,
+    pub gpu_narrow_widgets: TempWidgets,
+    pub narrow: bool,
 
     pub usage_row: libadwaita::ActionRow,
     pub usage_label: gtk4::Label,
@@ -167,11 +172,18 @@ impl StabilityState {
     }
 
     fn refresh_sensor_labels(&mut self, snapshot: &MonitorSnapshot) {
+        // Both layouts exist at once (only one is visible), so keep every gauge
+        // in sync. Values don't need prefixes - the row title says which chip.
+        for widgets in [&self.cpu_wide_widgets, &self.cpu_narrow_widgets] {
+            set_temp_widgets(widgets, snapshot.cpu_temp_c);
+        }
+        for widgets in [&self.gpu_wide_widgets, &self.gpu_narrow_widgets] {
+            set_temp_widgets(widgets, snapshot.gpu_temp_c);
+        }
+
         let mode = self.stress_type();
         match mode {
             StressType::Cpu => {
-                set_temp_widgets_with_prefix(&self.cpu_temp_widgets, snapshot.cpu_temp_c, None);
-                set_temp_widgets_with_prefix(&self.gpu_temp_widgets, snapshot.gpu_temp_c, None);
                 self.usage_label
                     .set_label(&format!("{:.0} %", snapshot.cpu_usage_pct));
                 let ram_used_gb = snapshot.ram_used_bytes as f64 / 1_000_000_000.0;
@@ -180,8 +192,6 @@ impl StabilityState {
                     .set_label(&format!("{ram_used_gb:.1} / {ram_total_gb:.1} GB"));
             }
             StressType::Gpu => {
-                set_temp_widgets_with_prefix(&self.gpu_temp_widgets, snapshot.gpu_temp_c, None);
-                set_temp_widgets_with_prefix(&self.cpu_temp_widgets, snapshot.cpu_temp_c, None);
                 self.usage_label.set_label(
                     &snapshot
                         .gpu_usage_pct
@@ -198,35 +208,24 @@ impl StabilityState {
                 }
             }
             StressType::Both => {
-                set_temp_widgets_with_prefix(
-                    &self.cpu_temp_widgets,
-                    snapshot.cpu_temp_c,
-                    Some("CPU"),
-                );
-                set_temp_widgets_with_prefix(
-                    &self.gpu_temp_widgets,
-                    snapshot.gpu_temp_c,
-                    Some("GPU"),
-                );
                 let cpu_s = format!("CPU {:.0}%", snapshot.cpu_usage_pct);
                 let gpu_s = snapshot
                     .gpu_usage_pct
                     .map(|u| format!("GPU {u:.0}%"))
                     .unwrap_or_else(|| "GPU —".to_string());
-                self.usage_label.set_label(&format!("{cpu_s}  ·  {gpu_s}"));
+                self.usage_label.set_label(&format!("{cpu_s} · {gpu_s}"));
 
                 let ram_used_gb = snapshot.ram_used_bytes as f64 / 1_000_000_000.0;
                 let ram_total_gb = snapshot.ram_total_bytes as f64 / 1_000_000_000.0;
-                let ram_s = format!("RAM {ram_used_gb:.1} / {ram_total_gb:.1}");
+                let ram_s = format!("RAM {ram_used_gb:.1}/{ram_total_gb:.1}");
                 let vram_used_gb = snapshot.vram_used_bytes as f64 / 1_000_000_000.0;
                 let vram_total_gb = snapshot.vram_total_bytes as f64 / 1_000_000_000.0;
                 let vram_s = if snapshot.vram_total_bytes > 0 {
-                    format!("VRAM {vram_used_gb:.1} / {vram_total_gb:.1}")
+                    format!("VRAM {vram_used_gb:.1}/{vram_total_gb:.1}")
                 } else {
                     "VRAM —".to_string()
                 };
-                self.memory_label
-                    .set_label(&format!("{ram_s}  ·  {vram_s}"));
+                self.memory_label.set_label(&format!("{ram_s} · {vram_s}"));
             }
         }
 
@@ -249,68 +248,88 @@ impl StabilityState {
         update_latched(&mut self.cpu_visual_hot, snapshot.cpu_temp_c);
         update_latched(&mut self.gpu_visual_hot, snapshot.gpu_temp_c);
 
-        // Keep text red via latched state (no warning icon per request)
-        if self.cpu_visual_hot {
-            self.cpu_temp_widgets.label.add_css_class("error");
-        } else {
-            self.cpu_temp_widgets.label.remove_css_class("error");
-        }
-        if self.gpu_visual_hot {
-            self.gpu_temp_widgets.label.add_css_class("error");
-        } else {
-            self.gpu_temp_widgets.label.remove_css_class("error");
-        }
-        // Override LevelBar color to match latched state so bar stays red
-        // instead of flickering blue when temp hovers around 90 or cutoff
+        // Keep text red via latched state (no warning icon per request), and
+        // override the LevelBar color to match so the bar stays red instead of
+        // flickering blue when temp hovers around 90 or cutoff.
         for (latched, widgets) in [
-            (self.cpu_visual_hot, &self.cpu_temp_widgets),
-            (self.gpu_visual_hot, &self.gpu_temp_widgets),
+            (self.cpu_visual_hot, &self.cpu_wide_widgets),
+            (self.cpu_visual_hot, &self.cpu_narrow_widgets),
+            (self.gpu_visual_hot, &self.gpu_wide_widgets),
+            (self.gpu_visual_hot, &self.gpu_narrow_widgets),
         ] {
             if latched {
+                widgets.label.add_css_class("error");
                 widgets.bar.remove_css_class("temp-low");
                 widgets.bar.remove_css_class("temp-high");
                 widgets.bar.remove_css_class("temp-full");
                 widgets.bar.add_css_class("temp-full");
+            } else {
+                widgets.label.remove_css_class("error");
             }
         }
     }
 
     fn apply_monitor_layout(&mut self) {
         let mode = self.stress_type();
+        let narrow = self.narrow;
 
-        let (cpu_width, gpu_width) = match mode {
-            StressType::Both => (96, 96),
-            _ => (120, 120),
+        // Wide combined row: two gauges share the row, so they're a touch
+        // narrower in Both. Narrow rows hold a single gauge each, so they can
+        // use the full width without cramping.
+        let wide_width = if matches!(mode, StressType::Both) {
+            96
+        } else {
+            120
         };
-        self.cpu_temp_widgets.bar.set_size_request(cpu_width, -1);
-        self.gpu_temp_widgets.bar.set_size_request(gpu_width, -1);
+        self.cpu_wide_widgets.bar.set_size_request(wide_width, -1);
+        self.gpu_wide_widgets.bar.set_size_request(wide_width, -1);
+        self.cpu_narrow_widgets.bar.set_size_request(120, -1);
+        self.gpu_narrow_widgets.bar.set_size_request(120, -1);
 
         // Group title always "Sensors" per user feedback
         self.sensors_group.set_title("Sensors");
+
+        // Wide combined row title, and which of its two gauges are shown.
         match mode {
             StressType::Cpu => {
                 self.temp_row.set_title("CPU Temperature");
-                self.usage_row.set_title("CPU Usage");
-                self.memory_row.set_title("Memory Usage");
-                self.usage_icon.set_icon_name(Some("processor-symbolic"));
-                self.cpu_temp_column.set_visible(true);
-                self.gpu_temp_column.set_visible(false);
+                self.cpu_wide_column.set_visible(true);
+                self.gpu_wide_column.set_visible(false);
             }
             StressType::Gpu => {
                 self.temp_row.set_title("GPU Temperature");
-                self.usage_row.set_title("GPU Usage");
-                self.memory_row.set_title("VRAM Usage");
-                self.usage_icon.set_icon_name(Some("pci-card-symbolic"));
-                self.cpu_temp_column.set_visible(false);
-                self.gpu_temp_column.set_visible(true);
+                self.cpu_wide_column.set_visible(false);
+                self.gpu_wide_column.set_visible(true);
             }
             StressType::Both => {
                 self.temp_row.set_title("Temperature");
+                self.cpu_wide_column.set_visible(true);
+                self.gpu_wide_column.set_visible(true);
+            }
+        }
+
+        // Wide keeps the combined row; narrow splits it into one row per chip.
+        self.temp_row.set_visible(!narrow);
+        self.cpu_temp_row
+            .set_visible(narrow && !matches!(mode, StressType::Gpu));
+        self.gpu_temp_row
+            .set_visible(narrow && !matches!(mode, StressType::Cpu));
+
+        match mode {
+            StressType::Cpu => {
+                self.usage_row.set_title("CPU Usage");
+                self.memory_row.set_title("Memory Usage");
+                self.usage_icon.set_icon_name(Some("processor-symbolic"));
+            }
+            StressType::Gpu => {
+                self.usage_row.set_title("GPU Usage");
+                self.memory_row.set_title("VRAM Usage");
+                self.usage_icon.set_icon_name(Some("pci-card-symbolic"));
+            }
+            StressType::Both => {
                 self.usage_row.set_title("Processor Load");
                 self.memory_row.set_title("Memory");
                 self.usage_icon.set_icon_name(Some("processor-symbolic"));
-                self.cpu_temp_column.set_visible(true);
-                self.gpu_temp_column.set_visible(true);
             }
         }
 
@@ -321,6 +340,15 @@ impl StabilityState {
         if !self.any_running() {
             self.refresh_button_state();
         }
+    }
+
+    /// Called by the window's breakpoint when it crosses the narrow threshold.
+    pub fn set_narrow(&mut self, narrow: bool) {
+        if self.narrow == narrow {
+            return;
+        }
+        self.narrow = narrow;
+        self.apply_monitor_layout();
     }
 
     pub fn update(&mut self, snapshot: &MonitorSnapshot) {
@@ -450,32 +478,53 @@ pub fn create_stability_view(
     let sensors_group = libadwaita::PreferencesGroup::new();
     sensors_group.set_title("Sensors");
 
+    let temp_icon_name = pick_temperature_icon();
+
+    // Wide layout: a single "Temperature" row with both gauges side by side.
     let temp_row = libadwaita::ActionRow::new();
     temp_row.set_title("CPU Temperature");
     temp_row.set_activatable(false);
-    let temp_icon_name = pick_temperature_icon();
     temp_row.add_prefix(&gtk4::Image::from_icon_name(&temp_icon_name));
 
     let temp_suffix = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
     temp_suffix.set_valign(gtk4::Align::Center);
     temp_suffix.set_halign(gtk4::Align::End);
 
-    let cpu_temp_column = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    cpu_temp_column.set_valign(gtk4::Align::Center);
-    cpu_temp_column.set_halign(gtk4::Align::End);
-    let cpu_temp_widgets = create_temp_widgets(false);
-    cpu_temp_column.append(&cpu_temp_widgets.container);
+    let cpu_wide_column = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    cpu_wide_column.set_valign(gtk4::Align::Center);
+    cpu_wide_column.set_halign(gtk4::Align::End);
+    let cpu_wide_widgets = create_temp_widgets(false);
+    cpu_wide_column.append(&cpu_wide_widgets.container);
 
-    let gpu_temp_column = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    gpu_temp_column.set_valign(gtk4::Align::Center);
-    gpu_temp_column.set_halign(gtk4::Align::End);
-    let gpu_temp_widgets = create_temp_widgets(false);
-    gpu_temp_column.append(&gpu_temp_widgets.container);
+    let gpu_wide_column = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    gpu_wide_column.set_valign(gtk4::Align::Center);
+    gpu_wide_column.set_halign(gtk4::Align::End);
+    let gpu_wide_widgets = create_temp_widgets(false);
+    gpu_wide_column.append(&gpu_wide_widgets.container);
 
-    temp_suffix.append(&cpu_temp_column);
-    temp_suffix.append(&gpu_temp_column);
+    temp_suffix.append(&cpu_wide_column);
+    temp_suffix.append(&gpu_wide_column);
     temp_row.add_suffix(&temp_suffix);
     sensors_group.add(&temp_row);
+
+    // Narrow layout: one row per chip (hidden until the breakpoint flips).
+    let cpu_temp_row = libadwaita::ActionRow::new();
+    cpu_temp_row.set_title("CPU Temperature");
+    cpu_temp_row.set_activatable(false);
+    cpu_temp_row.add_prefix(&gtk4::Image::from_icon_name(&temp_icon_name));
+    let cpu_narrow_widgets = create_temp_widgets(false);
+    cpu_temp_row.add_suffix(&cpu_narrow_widgets.container);
+    cpu_temp_row.set_visible(false);
+    sensors_group.add(&cpu_temp_row);
+
+    let gpu_temp_row = libadwaita::ActionRow::new();
+    gpu_temp_row.set_title("GPU Temperature");
+    gpu_temp_row.set_activatable(false);
+    gpu_temp_row.add_prefix(&gtk4::Image::from_icon_name(&temp_icon_name));
+    let gpu_narrow_widgets = create_temp_widgets(false);
+    gpu_temp_row.add_suffix(&gpu_narrow_widgets.container);
+    gpu_temp_row.set_visible(false);
+    sensors_group.add(&gpu_temp_row);
 
     let usage_row = libadwaita::ActionRow::new();
     usage_row.set_title("CPU Usage");
@@ -484,6 +533,8 @@ pub fn create_stability_view(
     usage_row.add_prefix(&usage_icon);
     let usage_label = gtk4::Label::new(Some("—"));
     usage_label.add_css_class("dim-label");
+    usage_label.set_xalign(1.0);
+    usage_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     usage_row.add_suffix(&usage_label);
     sensors_group.add(&usage_row);
 
@@ -494,6 +545,7 @@ pub fn create_stability_view(
     let memory_label = gtk4::Label::new(Some("—"));
     memory_label.add_css_class("dim-label");
     memory_label.set_xalign(1.0);
+    memory_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     memory_row.add_suffix(&memory_label);
     sensors_group.add(&memory_row);
 
@@ -571,11 +623,15 @@ pub fn create_stability_view(
         toggle_group: toggle_group.clone(),
         sensors_group: sensors_group.clone(),
         temp_row: temp_row.clone(),
-        cpu_temp_widgets,
-        gpu_temp_widgets,
-        cpu_temp_column: cpu_temp_column.clone(),
-        gpu_temp_column: gpu_temp_column.clone(),
-        temp_suffix: temp_suffix.clone(),
+        cpu_wide_column: cpu_wide_column.clone(),
+        gpu_wide_column: gpu_wide_column.clone(),
+        cpu_wide_widgets,
+        gpu_wide_widgets,
+        cpu_temp_row: cpu_temp_row.clone(),
+        gpu_temp_row: gpu_temp_row.clone(),
+        cpu_narrow_widgets,
+        gpu_narrow_widgets,
+        narrow: false,
         usage_row: usage_row.clone(),
         usage_label: usage_label.clone(),
         usage_icon: usage_icon.clone(),

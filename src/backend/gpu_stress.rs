@@ -469,7 +469,33 @@ impl GpuStressManager {
     }
 
     pub fn is_available() -> bool {
-        unsafe { ash::Entry::load() }.is_ok()
+        let entry = match unsafe { ash::Entry::load() } {
+            Ok(entry) => entry,
+            Err(_) => return false,
+        };
+
+        let app_name = match std::ffi::CString::new("Crucible GPU Stress") {
+            Ok(name) => name,
+            Err(_) => return false,
+        };
+        let app_info = vk::ApplicationInfo::default()
+            .application_name(app_name.as_c_str())
+            .api_version(vk::API_VERSION_1_0);
+        let instance_create_info = vk::InstanceCreateInfo::default().application_info(&app_info);
+
+        let instance = match unsafe { entry.create_instance(&instance_create_info, None) } {
+            Ok(instance) => instance,
+            Err(_) => return false,
+        };
+
+        // Same device selection the stress worker uses, so availability can't
+        // disagree with whether a test can actually start.
+        let available = unsafe { instance.enumerate_physical_devices() }
+            .map(|devices| VulkanContext::pick_compute_device(&instance, &devices).is_some())
+            .unwrap_or(false);
+
+        unsafe { instance.destroy_instance(None) };
+        available
     }
 
     pub fn start(&mut self, duration_seconds: u64) -> bool {

@@ -23,7 +23,6 @@ pub fn create_window(
     window.set_title(Some("Crucible"));
     window.set_default_width(550);
     window.set_default_height(550);
-    window.set_size_request(400, 510);
 
     let toolbar_view = libadwaita::ToolbarView::new();
 
@@ -113,6 +112,31 @@ pub fn create_window(
 
     view_switcher.set_stack(Some(&view_stack));
     toolbar_view.set_content(Some(&view_stack));
+
+    // On narrow (mobile) widths there isn't room for the switcher's labels, so
+    // fall back to icon-only tabs, and reflow the sensor rows so each chip's
+    // temperature gets its own row. libadwaita itself enforces a 360px minimum
+    // window width (its phone-sized floor), so this keeps things comfortable
+    // right down to that size.
+    if let Ok(condition) = libadwaita::BreakpointCondition::parse("max-width: 500px") {
+        let breakpoint = libadwaita::Breakpoint::new(condition);
+        breakpoint.add_setters(&[(
+            &view_switcher,
+            "policy",
+            libadwaita::ViewSwitcherPolicy::Narrow,
+        )]);
+
+        let state_for_apply = stability_state.clone();
+        breakpoint.connect_apply(move |_| {
+            state_for_apply.borrow_mut().set_narrow(true);
+        });
+        let state_for_unapply = stability_state.clone();
+        breakpoint.connect_unapply(move |_| {
+            state_for_unapply.borrow_mut().set_narrow(false);
+        });
+
+        window.add_breakpoint(breakpoint);
+    }
 
     window.set_content(Some(&toolbar_view));
 

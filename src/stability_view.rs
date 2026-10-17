@@ -390,6 +390,14 @@ impl StabilityState {
                         "Test completed successfully (Elapsed: {elapsed})"
                     ));
                 }
+                Some("error") => {
+                    let reason = self
+                        .gpu_stress
+                        .last_error()
+                        .unwrap_or("unknown error")
+                        .to_string();
+                    self.send_desktop_notification(&format!("GPU test failed: {reason}"));
+                }
                 _ => {
                     self.send_desktop_notification(&format!("Test stopped (Elapsed: {elapsed})"));
                 }

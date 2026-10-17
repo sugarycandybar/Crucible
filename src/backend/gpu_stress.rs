@@ -179,15 +179,22 @@ impl VulkanContext {
         let mem_reqs = unsafe { device.get_buffer_memory_requirements(buffer) };
         let mem_properties =
             unsafe { instance.get_physical_device_memory_properties(physical_device) };
+        // Pick a host-visible memory type that the buffer is actually allowed to
+        // use. `memory_type_bits` is indexed by memory *type* index (and the
+        // array's tail past `memory_type_count` is uninitialized, so only the
+        // valid entries are considered).
         let mem_type_index = mem_properties
             .memory_types
             .iter()
-            .position(|m| {
-                (mem_reqs.memory_type_bits & (1 << m.heap_index)) != 0
+            .take(mem_properties.memory_type_count as usize)
+            .enumerate()
+            .find(|(i, m)| {
+                (mem_reqs.memory_type_bits & (1u32 << i)) != 0
                     && m.property_flags
                         .contains(vk::MemoryPropertyFlags::HOST_VISIBLE)
             })
-            .ok_or("No suitable memory type found")? as u32;
+            .map(|(i, _)| i as u32)
+            .ok_or("No suitable memory type found")?;
 
         let alloc_info = vk::MemoryAllocateInfo::default()
             .allocation_size(mem_reqs.size)
@@ -309,12 +316,12 @@ impl VulkanContext {
         discrete.or(integrated)
     }
 
-    unsafe fn dispatch(&self) {
+    unsafe fn dispatch(&self) -> Result<(), String> {
         let begin_info = vk::CommandBufferBeginInfo::default()
             .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
         self.device
             .begin_command_buffer(self.command_buffer, &begin_info)
-            .ok();
+            .map_err(|e| format!("begin_command_buffer failed: {e:?}"))?;
         self.device.cmd_bind_pipeline(
             self.command_buffer,
             vk::PipelineBindPoint::COMPUTE,
@@ -330,14 +337,20 @@ impl VulkanContext {
         );
         let groups = (BUF_SIZE as u32).div_ceil(WORKGROUP_SIZE);
         self.device.cmd_dispatch(self.command_buffer, groups, 1, 1);
-        self.device.end_command_buffer(self.command_buffer).ok();
+        self.device
+            .end_command_buffer(self.command_buffer)
+            .map_err(|e| format!("end_command_buffer failed: {e:?}"))?;
 
         let cmd_buffers = [self.command_buffer];
         let submit_info = vk::SubmitInfo::default().command_buffers(&cmd_buffers);
         self.device
             .queue_submit(self.queue, &[submit_info], vk::Fence::null())
-            .ok();
-        self.device.queue_wait_idle(self.queue).ok();
+            .map_err(|e| format!("queue_submit failed: {e:?}"))?;
+        // A failure here usually means the GPU hung or the device was lost.
+        self.device
+            .queue_wait_idle(self.queue)
+            .map_err(|e| format!("queue_wait_idle failed (GPU hang or device lost?): {e:?}"))?;
+        Ok(())
     }
 }
 
@@ -374,11 +387,12 @@ pub enum GpuStressState {
 pub struct GpuStressManager {
     state: GpuStressState,
     stop_flag: Option<Arc<AtomicBool>>,
-    worker_handle: Option<std::thread::JoinHandle<()>>,
+    worker_handle: Option<std::thread::JoinHandle<Result<(), String>>>,
     start_time: Option<Instant>,
     duration_seconds: u64,
     last_stop_cause: Option<String>,
     last_elapsed_seconds: f64,
+    last_error: Option<String>,
 }
 
 impl GpuStressManager {
@@ -391,6 +405,7 @@ impl GpuStressManager {
             duration_seconds: 0,
             last_stop_cause: None,
             last_elapsed_seconds: 0.0,
+            last_error: None,
         }
     }
 
@@ -404,7 +419,14 @@ impl GpuStressManager {
                         .unwrap_or(0.0);
                     self.last_elapsed_seconds = elapsed.max(0.0);
 
-                    if self.duration_seconds > 0
+                    let result = self.worker_handle.take().map(|h| h.join());
+
+                    if let Some(Ok(Err(message))) = result {
+                        // The worker bailed out (e.g. device lost, no compute
+                        // device, Vulkan init failure). Surface the reason.
+                        self.last_error = Some(message);
+                        self.last_stop_cause = Some("error".to_string());
+                    } else if self.duration_seconds > 0
                         && elapsed >= self.duration_seconds.saturating_sub(1) as f64
                     {
                         self.last_stop_cause = Some("completed".to_string());
@@ -412,7 +434,6 @@ impl GpuStressManager {
                         self.last_stop_cause = Some("exited".to_string());
                     }
 
-                    let _ = self.worker_handle.take().map(|h| h.join());
                     self.state = GpuStressState::Idle;
                     self.stop_flag = None;
                     self.duration_seconds = 0;
@@ -443,6 +464,10 @@ impl GpuStressManager {
         self.last_stop_cause.as_deref()
     }
 
+    pub fn last_error(&self) -> Option<&str> {
+        self.last_error.as_deref()
+    }
+
     pub fn is_available() -> bool {
         unsafe { ash::Entry::load() }.is_ok()
     }
@@ -458,13 +483,12 @@ impl GpuStressManager {
         self.start_time = Some(Instant::now());
         self.duration_seconds = duration_seconds;
         self.last_stop_cause = None;
+        self.last_error = None;
         self.last_elapsed_seconds = 0.0;
 
         let handle = std::thread::Builder::new()
             .name("gpu-stress".into())
-            .spawn(move || {
-                Self::worker_main(flag, duration_seconds);
-            });
+            .spawn(move || Self::worker_main(flag, duration_seconds));
 
         match handle {
             Ok(h) => {
@@ -480,29 +504,30 @@ impl GpuStressManager {
         }
     }
 
-    fn worker_main(stop_flag: Arc<AtomicBool>, duration_seconds: u64) {
-        let entry = match unsafe { ash::Entry::load() } {
-            Ok(e) => e,
-            Err(_) => return,
-        };
+    fn worker_main(stop_flag: Arc<AtomicBool>, duration_seconds: u64) -> Result<(), String> {
+        let entry =
+            unsafe { ash::Entry::load() }.map_err(|e| format!("Vulkan loader unavailable: {e}"))?;
 
-        let ctx = match VulkanContext::create(&entry) {
-            Ok(c) => c,
-            Err(_) => return,
-        };
+        let ctx = VulkanContext::create(&entry)?;
 
-        let max_dispatches = if duration_seconds > 0 {
-            (duration_seconds * 100) + 10
-        } else {
-            u64::MAX
-        };
+        let start = Instant::now();
+        let duration = std::time::Duration::from_secs(duration_seconds);
 
-        for _ in 0..max_dispatches {
+        // Run until the requested duration has actually elapsed (wall clock),
+        // not a fixed number of dispatches: GPUs differ wildly in how fast a
+        // dispatch completes, so a dispatch count makes short tests end early
+        // on fast hardware and long tests run forever on slow hardware.
+        loop {
             if stop_flag.load(Ordering::Relaxed) {
                 break;
             }
-            unsafe { ctx.dispatch() };
+            if duration_seconds > 0 && start.elapsed() >= duration {
+                break;
+            }
+            unsafe { ctx.dispatch()? };
         }
+
+        Ok(())
     }
 
     pub fn stop(&mut self, cause: &str) {
@@ -608,5 +633,34 @@ mod tests {
         manager.stop("manual_stop");
         assert_eq!(manager.state(), GpuStressState::Idle);
         assert_eq!(manager.last_stop_cause(), Some("manual_stop"));
+    }
+
+    #[test]
+    fn test_gpu_stress_runs_for_requested_duration() {
+        let mut manager = GpuStressManager::new();
+        if !GpuStressManager::is_available() {
+            println!("Vulkan not available, skipping duration test");
+            return;
+        }
+
+        // A short test must actually run to completion rather than ending after
+        // a fixed number of dispatches (which finishes far too early on fast
+        // GPUs and looks like a failure to the user).
+        let duration = 3;
+        assert!(manager.start(duration));
+
+        // Wait well past the requested duration for the worker to finish.
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(duration + 30);
+        while manager.is_running() && std::time::Instant::now() < deadline {
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+
+        assert!(!manager.is_running(), "test did not finish in time");
+        assert_eq!(manager.last_stop_cause(), Some("completed"));
+        assert!(
+            manager.last_elapsed_seconds() >= (duration - 1) as f64,
+            "test ended after only {:.1}s (expected ~{duration}s)",
+            manager.last_elapsed_seconds()
+        );
     }
 }

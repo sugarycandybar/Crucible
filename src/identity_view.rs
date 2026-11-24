@@ -150,6 +150,8 @@ pub fn create_identity_view(specs: &SystemSpecs) -> gtk4::ScrolledWindow {
 }
 
 fn get_vram_total_bytes() -> u64 {
+    let nvml_total = crate::backend::nvidia::total_vram_bytes();
+
     let mut total: u64 = 0;
     let drm_base = Path::new("/sys/class/drm");
     if drm_base.is_dir() {
@@ -163,7 +165,14 @@ fn get_vram_total_bytes() -> u64 {
                 if suffix.is_empty() || !suffix.chars().all(|c| c.is_ascii_digit()) {
                     continue;
                 }
-                let total_path = entry.path().join("device").join("mem_info_vram_total");
+                let dev_dir = entry.path().join("device");
+                if nvml_total.is_some() {
+                    let vendor = fs::read_to_string(dev_dir.join("vendor")).unwrap_or_default();
+                    if vendor.trim() == "0x10de" {
+                        continue;
+                    }
+                }
+                let total_path = dev_dir.join("mem_info_vram_total");
                 if let Ok(content) = fs::read_to_string(&total_path) {
                     if let Ok(v) = content.trim().parse::<u64>() {
                         total += v;
@@ -171,6 +180,9 @@ fn get_vram_total_bytes() -> u64 {
                 }
             }
         }
+    }
+    if let Some(nvml_total) = nvml_total {
+        return total + nvml_total;
     }
     if total > 0 {
         return total;

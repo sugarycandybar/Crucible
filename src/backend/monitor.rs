@@ -2,6 +2,10 @@ use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
 
+use crate::backend::nvidia::{self, NvidiaStats};
+
+const NVIDIA_VENDOR_ID: &str = "0x10de";
+
 const HISTORY_SIZE: usize = 300;
 
 #[derive(Debug, Clone)]
@@ -279,7 +283,8 @@ fn read_gpu_usage() -> Option<f32> {
     max_usage
 }
 
-fn read_vram() -> (u64, u64) {
+/// Reads VRAM usage/total from DRM sysfs, optionally excluding NVIDIA cards.
+fn read_vram(skip_nvidia: bool) -> (u64, u64) {
     let drm_base = Path::new("/sys/class/drm");
     if !drm_base.is_dir() {
         return (0, 0);
@@ -295,6 +300,12 @@ fn read_vram() -> (u64, u64) {
                 continue;
             }
             let dev_dir = entry.path().join("device");
+            if skip_nvidia {
+                let vendor = fs::read_to_string(dev_dir.join("vendor")).unwrap_or_default();
+                if vendor.trim() == NVIDIA_VENDOR_ID {
+                    continue;
+                }
+            }
             let total_path = dev_dir.join("mem_info_vram_total");
             let used_path = dev_dir.join("mem_info_vram_used");
 
@@ -313,7 +324,8 @@ fn read_vram() -> (u64, u64) {
     (used, total)
 }
 
-fn read_nvidia_gpu_utilization() -> Option<(Option<f64>, Option<f32>, u64, u64)> {
+/// Fallback for systems with nvidia-smi but no usable NVML.
+fn read_nvidia_smi_stats() -> Option<NvidiaStats> {
     let output = std::process::Command::new("nvidia-smi")
         .args([
             "--query-gpu=temperature.gpu,utilization.gpu,memory.used,memory.total",
@@ -325,10 +337,7 @@ fn read_nvidia_gpu_utilization() -> Option<(Option<f64>, Option<f32>, u64, u64)>
         return None;
     }
     let stdout = String::from_utf8_lossy(&output.stdout);
-    let mut temp: Option<f64> = None;
-    let mut usage: Option<f32> = None;
-    let mut vram_used: u64 = 0;
-    let mut vram_total: u64 = 0;
+    let mut stats = NvidiaStats::default();
 
     for line in stdout.lines() {
         let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
@@ -336,22 +345,29 @@ fn read_nvidia_gpu_utilization() -> Option<(Option<f64>, Option<f32>, u64, u64)>
             continue;
         }
         if let Ok(t) = parts[0].parse::<f64>() {
-            temp = Some(temp.map_or(t, |m| m.max(t)));
+            stats.temperature_c = Some(stats.temperature_c.map_or(t, |m| m.max(t)));
         }
         if let Ok(u) = parts[1].parse::<f32>() {
-            usage = Some(usage.map_or(u, |m| m.max(u)));
+            stats.usage_pct = Some(stats.usage_pct.map_or(u, |m| m.max(u)));
         }
         if let Ok(u) = parts[2].parse::<u64>() {
-            vram_used += u * 1024 * 1024;
+            stats.vram_used_bytes += u * 1024 * 1024;
         }
         if let Ok(t) = parts[3].parse::<u64>() {
-            vram_total += t * 1024 * 1024;
+            stats.vram_total_bytes += t * 1024 * 1024;
         }
     }
-    if temp.is_none() && usage.is_none() && vram_used == 0 {
+    if stats.temperature_c.is_none() && stats.usage_pct.is_none() && stats.vram_total_bytes == 0 {
         return None;
     }
-    Some((temp, usage, vram_used, vram_total))
+    Some(stats)
+}
+
+fn max_option<T: PartialOrd>(a: Option<T>, b: Option<T>) -> Option<T> {
+    match (a, b) {
+        (Some(a), Some(b)) => Some(if b > a { b } else { a }),
+        (a, b) => a.or(b),
+    }
 }
 
 fn read_cpu_freq() -> f64 {
@@ -412,19 +428,38 @@ impl SystemMonitor {
             self.temp_history.pop_front();
         }
 
-        let gpu_temp = read_gpu_temp();
-        let gpu_usage =
-            read_gpu_usage().or_else(|| read_nvidia_gpu_utilization().and_then(|(_, u, _, _)| u));
-        let (vram_used, vram_total) = {
-            let (u, t) = read_vram();
-            if t > 0 {
-                (u, t)
-            } else {
-                read_nvidia_gpu_utilization()
-                    .map(|(_, _, u, t)| (u, t))
-                    .unwrap_or((0, 0))
+        let nvml_stats = nvidia::snapshot();
+
+        let use_nvml_vram = nvml_stats.is_some_and(|stats| stats.vram_total_bytes > 0);
+        let (mut vram_used, mut vram_total) = read_vram(use_nvml_vram);
+        if use_nvml_vram {
+            if let Some(stats) = nvml_stats {
+                vram_used += stats.vram_used_bytes;
+                vram_total += stats.vram_total_bytes;
             }
-        };
+        }
+
+        let mut gpu_temp = max_option(
+            read_gpu_temp(),
+            nvml_stats.and_then(|stats| stats.temperature_c),
+        );
+        let mut gpu_usage = max_option(
+            read_gpu_usage(),
+            nvml_stats.and_then(|stats| stats.usage_pct),
+        );
+
+        let needs_fallback =
+            (gpu_temp.is_none() || gpu_usage.is_none() || vram_total == 0) && nvidia::is_present();
+        if needs_fallback {
+            if let Some(stats) = read_nvidia_smi_stats() {
+                gpu_temp = gpu_temp.or(stats.temperature_c);
+                gpu_usage = gpu_usage.or(stats.usage_pct);
+                if vram_total == 0 && stats.vram_total_bytes > 0 {
+                    vram_used = stats.vram_used_bytes;
+                    vram_total = stats.vram_total_bytes;
+                }
+            }
+        }
 
         MonitorSnapshot {
             cpu_temp_c: temp,
@@ -510,8 +545,17 @@ mod tests {
         // environments. They should not panic regardless.
         let _temp = read_gpu_temp();
         let _usage = read_gpu_usage();
-        let (_used, _total) = read_vram();
+        let (_used, _total) = read_vram(false);
+        let (_used, _total) = read_vram(true);
         // Just verify they complete without panicking
+    }
+
+    #[test]
+    fn test_max_option() {
+        assert_eq!(max_option(Some(1.0), Some(2.0)), Some(2.0));
+        assert_eq!(max_option(Some(3.0), None), Some(3.0));
+        assert_eq!(max_option(None, Some(4.0)), Some(4.0));
+        assert_eq!(max_option::<f64>(None, None), None);
     }
 
     #[test]

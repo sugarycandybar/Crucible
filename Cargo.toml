@@ -14,6 +14,7 @@ glib = "0.22"
 
 regex = "1"
 libc = "0.2"
+nvml-wrapper = "0.13"
 
 naga = { version = "0.20", features = ["glsl-in", "spv-out"] }
 ash = "0.38"
